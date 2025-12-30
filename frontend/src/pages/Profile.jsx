@@ -11,7 +11,6 @@ function Profile() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
 
-  // Load profile data
   useEffect(() => {
     if (!token) return;
 
@@ -23,56 +22,44 @@ function Profile() {
       .catch(() => setLoading(false));
   }, [token]);
 
-  // Avatar upload handler
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const formData = new FormData();
-    formData.append("avatar", file); // MUST be "avatar"
+    formData.append("avatar", file);
 
     try {
       setUploading(true);
-
       await api.post("auth/me/avatar/", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
-
-      // Refresh profile after upload
       const res = await api.get("auth/me/");
       setData(res.data);
-    } catch (err) {
-      console.error("Avatar upload failed", err);
-      alert("Failed to upload avatar");
     } finally {
       setUploading(false);
     }
   };
 
-  if (!token) return <p>Please login</p>;
-  if (loading) return <p>Loading...</p>;
-  if (!data) return <p>Error loading profile</p>;
+  if (!token) return <p style={styles.center}>Please login</p>;
+  if (loading) return <p style={styles.center}>Loading profile…</p>;
+  if (!data) return <p style={styles.center}>Error loading profile</p>;
 
   return (
-    <div style={styles.container}>
-      {/* ===== HEADER ===== */}
-      <div style={styles.header}>
-        {data.profile?.avatar && (
-          <img
-            src={`${BACKEND_URL}${data.profile.avatar}`}
-            alt="avatar"
-            style={styles.avatar}
-          />
-        )}
+    <div style={styles.page}>
+      {/* Header */}
+      <div style={styles.headerCard}>
+        <img
+          src={`${BACKEND_URL}${data.profile.avatar}`}
+          alt="avatar"
+          style={styles.avatar}
+        />
 
         <div>
-          <h2>{data.user.username}</h2>
+          <h1 style={styles.username}>{data.user.username}</h1>
 
-          {/* Change avatar */}
-          <label style={styles.editBtn}>
-            {uploading ? "Uploading..." : "Change avatar"}
+          <label style={styles.changeAvatar}>
+            {uploading ? "Uploading…" : "Change avatar"}
             <input
               type="file"
               accept="image/*"
@@ -84,63 +71,88 @@ function Profile() {
         </div>
       </div>
 
-      {/* ===== POSTS ===== */}
+      {/* Posts */}
       <section style={styles.section}>
-        <h3>My Posts</h3>
+        <h2 style={styles.sectionTitle}>My Posts</h2>
 
         {data.posts.length === 0 && <p>No posts yet.</p>}
 
-        {data.posts.map((post) => (
-          <ProfilePostCard key={post.id} post={post} />
-        ))}
+        <div style={styles.list}>
+          {data.posts.map((post) => (
+            <ProfilePostCard key={post.id} post={post} />
+          ))}
+        </div>
       </section>
 
-      {/* ===== COMMENTS ===== */}
+      {/* Comments */}
       <section style={styles.section}>
-        <h3>My Comments</h3>
+        <h2 style={styles.sectionTitle}>My Comments</h2>
 
         {data.comments.length === 0 && <p>No comments yet.</p>}
 
-        {data.comments.map((comment) => (
-          <ProfileCommentCard key={comment.id} comment={comment} />
-        ))}
+        <div style={styles.list}>
+          {data.comments.map((comment) => (
+            <ProfileCommentCard key={comment.id} comment={comment} />
+          ))}
+        </div>
       </section>
     </div>
   );
 }
 
 const styles = {
-  container: {
-    maxWidth: "800px",
+  page: {
+    maxWidth: "900px",
     margin: "30px auto",
-    background: "#fff",
-    padding: "24px",
-    borderRadius: "8px",
+    padding: "0 20px",
   },
-  header: {
+  center: {
+    padding: "40px",
+    textAlign: "center",
+  },
+
+  headerCard: {
     display: "flex",
+    gap: "24px",
     alignItems: "center",
-    gap: "20px",
-    marginBottom: "30px",
+    background: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: "12px",
+    padding: "24px",
+    marginBottom: "32px",
   },
   avatar: {
-    width: "100px",
-    height: "100px",
+    width: "96px",
+    height: "96px",
     borderRadius: "50%",
     objectFit: "cover",
-    border: "1px solid #ccc",
+    border: "1px solid #e5e7eb",
   },
-  editBtn: {
+  username: {
+    margin: 0,
+    fontSize: "22px",
+    fontWeight: "600",
+  },
+  changeAvatar: {
     display: "inline-block",
     marginTop: "8px",
-    padding: "6px 10px",
-    cursor: "pointer",
-    border: "1px solid #ccc",
-    borderRadius: "4px",
     fontSize: "14px",
+    color: "#4f46e5",
+    cursor: "pointer",
   },
+
   section: {
-    marginTop: "30px",
+    marginBottom: "32px",
+  },
+  sectionTitle: {
+    fontSize: "18px",
+    fontWeight: "600",
+    marginBottom: "12px",
+  },
+  list: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
   },
 };
 

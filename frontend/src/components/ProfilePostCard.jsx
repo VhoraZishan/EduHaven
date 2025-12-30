@@ -8,7 +8,7 @@ function ProfilePostCard({ post }) {
       style={styles.card}
       onClick={() => navigate(`/posts/${post.id}`)}
     >
-      <h4>{post.title}</h4>
+      <h3 style={styles.title}>{post.title}</h3>
       <p style={styles.meta}>
         {new Date(post.created_at).toLocaleString()}
       </p>
@@ -18,16 +18,21 @@ function ProfilePostCard({ post }) {
 
 const styles = {
   card: {
-    padding: "12px",
-    border: "1px solid #ddd",
-    borderRadius: "6px",
-    marginBottom: "10px",
+    background: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: "10px",
+    padding: "16px",
     cursor: "pointer",
-    background: "#fff",
+    transition: "background 0.15s ease",
+  },
+  title: {
+    margin: "0 0 6px 0",
+    fontSize: "16px",
+    fontWeight: "500",
   },
   meta: {
     fontSize: "12px",
-    color: "#666",
+    color: "#6b7280",
   },
 };
 

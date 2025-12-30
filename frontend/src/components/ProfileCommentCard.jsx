@@ -8,7 +8,7 @@ function ProfileCommentCard({ comment }) {
       style={styles.card}
       onClick={() => navigate(`/posts/${comment.post}`)}
     >
-      <p>{comment.body}</p>
+      <p style={styles.body}>{comment.body}</p>
       <span style={styles.meta}>
         On post #{comment.post} •{" "}
         {new Date(comment.created_at).toLocaleString()}
@@ -19,16 +19,19 @@ function ProfileCommentCard({ comment }) {
 
 const styles = {
   card: {
-    padding: "12px",
-    border: "1px solid #ddd",
-    borderRadius: "6px",
-    marginBottom: "10px",
+    background: "#f9fafb",
+    border: "1px solid #e5e7eb",
+    borderRadius: "10px",
+    padding: "14px",
     cursor: "pointer",
-    background: "#fafafa",
+  },
+  body: {
+    marginBottom: "6px",
+    fontSize: "14px",
   },
   meta: {
     fontSize: "11px",
-    color: "#777",
+    color: "#6b7280",
   },
 };
 

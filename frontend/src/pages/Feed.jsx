@@ -12,31 +12,47 @@ function Feed() {
         setPosts(res.data);
         setLoading(false);
       })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
+      .catch(() => setLoading(false));
   }, []);
 
-  if (loading) return <p style={{ padding: "20px" }}>Loading...</p>;
+  if (loading) {
+    return <p style={styles.loading}>Loading feed...</p>;
+  }
 
   return (
-    <div style={styles.container}>
-      <h2>Global Feed</h2>
+    <div style={styles.page}>
+      <h1 style={styles.title}>Global Feed</h1>
 
       {posts.length === 0 && <p>No posts yet.</p>}
 
-      {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
-      ))}
+      <div style={styles.feed}>
+        {posts.map((post) => (
+          <PostCard key={post.id} post={post} />
+        ))}
+      </div>
     </div>
   );
 }
 
 const styles = {
-  container: {
-    maxWidth: "800px",
-    margin: "20px auto",
+  page: {
+    maxWidth: "900px",
+    margin: "30px auto",
+    padding: "0 20px",
+  },
+  title: {
+    fontSize: "24px",
+    fontWeight: "600",
+    marginBottom: "24px",
+  },
+  feed: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+  },
+  loading: {
+    padding: "40px",
+    textAlign: "center",
   },
 };
 

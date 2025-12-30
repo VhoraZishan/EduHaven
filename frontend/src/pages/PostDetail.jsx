@@ -14,7 +14,7 @@ function PostDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // 🔹 Load post + comments
+  // Load post + comments
   useEffect(() => {
     Promise.all([
       api.get(`posts/${id}/`),
@@ -25,25 +25,14 @@ function PostDetail() {
         setComments(commentsRes.data);
         setLoading(false);
       })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
+      .catch(() => setLoading(false));
   }, [id]);
 
-  // 🔹 Ensure post author username
+  // Ensure usernames
   useEffect(() => {
-    if (post) {
-      ensureUser(post.author);
-    }
-  }, [post]);
-
-  // 🔹 Ensure comment authors usernames
-  useEffect(() => {
-    comments.forEach((c) => {
-      ensureUser(c.author);
-    });
-  }, [comments]);
+    if (post) ensureUser(post.author);
+    comments.forEach((c) => ensureUser(c.author));
+  }, [post, comments]);
 
   const handleAddComment = async (e) => {
     e.preventDefault();
@@ -53,89 +42,153 @@ function PostDetail() {
       const res = await addComment(id, { body: commentText });
       setComments((prev) => [...prev, res.data]);
       setCommentText("");
-    } catch (err) {
+    } catch {
       setError("Failed to add comment");
     }
   };
 
-  if (loading) return <p style={{ padding: "20px" }}>Loading...</p>;
+  if (loading) return <p style={styles.loading}>Loading post...</p>;
   if (!post) return <p>Post not found</p>;
 
   return (
-    <div style={styles.container}>
-      <h2>{post.title}</h2>
+    <div style={styles.page}>
+      {/* POST CARD */}
+      <div style={styles.postCard}>
+        <h1 style={styles.title}>{post.title}</h1>
 
-      <p style={styles.meta}>
-        {userMap[post.author] || "Loading..."} •{" "}
-        {new Date(post.created_at).toLocaleString()}
-      </p>
-
-      <p style={styles.body}>{post.body}</p>
-
-      <hr />
-
-      <h3>Comments</h3>
-
-      {comments.length === 0 && <p>No comments yet.</p>}
-
-      {comments.map((c) => (
-        <div key={c.id} style={styles.comment}>
-          <p>{c.body}</p>
-          <span style={styles.commentMeta}>
-            {userMap[c.author] || "Loading..."} •{" "}
-            {new Date(c.created_at).toLocaleString()}
-          </span>
+        <div style={styles.meta}>
+          <span>{userMap[post.author] || "Loading..."}</span>
+          <span>•</span>
+          <span>{new Date(post.created_at).toLocaleString()}</span>
         </div>
-      ))}
 
-      {token ? (
-        <form onSubmit={handleAddComment} style={{ marginTop: "20px" }}>
-          {error && <p style={{ color: "red" }}>{error}</p>}
+        <div style={styles.body}>{post.body}</div>
+      </div>
 
-          <textarea
-            placeholder="Write a comment..."
-            value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
-            rows={3}
-            required
-          />
+      {/* COMMENTS */}
+      <div style={styles.commentsSection}>
+        <h3 style={styles.sectionTitle}>Comments</h3>
 
-          <button type="submit">Add Comment</button>
-        </form>
-      ) : (
-        <p style={{ marginTop: "20px", color: "#666" }}>
-          Login to add a comment.
-        </p>
-      )}
+        {comments.length === 0 && (
+          <p style={styles.empty}>No comments yet.</p>
+        )}
+
+        {comments.map((c) => (
+          <div key={c.id} style={styles.commentCard}>
+            <p style={styles.commentBody}>{c.body}</p>
+            <div style={styles.commentMeta}>
+              {userMap[c.author] || "Loading..."} •{" "}
+              {new Date(c.created_at).toLocaleString()}
+            </div>
+          </div>
+        ))}
+
+        {/* ADD COMMENT */}
+        {token ? (
+          <form onSubmit={handleAddComment} style={styles.commentForm}>
+            {error && <p style={styles.error}>{error}</p>}
+
+            <textarea
+              placeholder="Write a comment..."
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              rows={3}
+              required
+            />
+
+            <button type="submit">Add Comment</button>
+          </form>
+        ) : (
+          <p style={styles.loginHint}>
+            Login to add a comment.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
 
 const styles = {
-  container: {
-    maxWidth: "800px",
-    margin: "20px auto",
-    background: "#fff",
-    padding: "20px",
-    borderRadius: "6px",
+  page: {
+    maxWidth: "900px",
+    margin: "30px auto",
+    padding: "0 20px",
+  },
+  loading: {
+    padding: "40px",
+    textAlign: "center",
+  },
+
+  /* Post */
+  postCard: {
+    background: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: "10px",
+    padding: "24px",
+    marginBottom: "30px",
+  },
+  title: {
+    fontSize: "24px",
+    fontWeight: "600",
+    marginBottom: "6px",
   },
   meta: {
     fontSize: "12px",
-    color: "#666",
+    color: "#6b7280",
+    display: "flex",
+    gap: "6px",
+    marginBottom: "20px",
   },
   body: {
-    marginTop: "15px",
+    fontSize: "15px",
+    lineHeight: "1.6",
     whiteSpace: "pre-wrap",
   },
-  comment: {
-    padding: "10px",
-    background: "#f5f5f5",
-    borderRadius: "4px",
-    marginBottom: "10px",
+
+  /* Comments */
+  commentsSection: {
+    background: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: "10px",
+    padding: "20px",
+  },
+  sectionTitle: {
+    fontSize: "18px",
+    fontWeight: "600",
+    marginBottom: "16px",
+  },
+  empty: {
+    fontSize: "14px",
+    color: "#6b7280",
+  },
+  commentCard: {
+    background: "#f9fafb",
+    border: "1px solid #e5e7eb",
+    borderRadius: "8px",
+    padding: "12px",
+    marginBottom: "12px",
+  },
+  commentBody: {
+    fontSize: "14px",
+    marginBottom: "6px",
   },
   commentMeta: {
     fontSize: "11px",
-    color: "#777",
+    color: "#6b7280",
+  },
+
+  /* Comment form */
+  commentForm: {
+    marginTop: "20px",
+  },
+  error: {
+    color: "#dc2626",
+    marginBottom: "8px",
+  },
+  loginHint: {
+    marginTop: "20px",
+    fontSize: "14px",
+    color: "#6b7280",
   },
 };
 

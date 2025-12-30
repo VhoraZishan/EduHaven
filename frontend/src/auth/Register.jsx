@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
 
 function Register() {
@@ -20,49 +20,123 @@ function Register() {
       });
 
       navigate("/login");
-    } catch (err) {
-      setError("Registration failed");
+    } catch {
+      setError("Registration failed. Try a different username.");
     }
   };
 
   return (
-    <div style={styles.container}>
-      <h2>Register</h2>
+    <div style={styles.page}>
+      <div style={styles.card}>
+        <h1 style={styles.title}>Create an account</h1>
+        <p style={styles.subtitle}>
+          Join EduHaven and start posting
+        </p>
 
-      {error && <p style={styles.error}>{error}</p>}
+        {error && <div style={styles.error}>{error}</div>}
 
-      <form onSubmit={handleSubmit}>
-        <input
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <input
+            style={styles.input}
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+          <input
+            style={styles.input}
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-        <button type="submit">Register</button>
-      </form>
+          <button style={styles.button} type="submit">
+            Sign up
+          </button>
+        </form>
+
+        <p style={styles.footer}>
+          Already have an account?{" "}
+          <Link to="/login" style={styles.link}>
+            Login
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
 
 const styles = {
-  container: {
-    maxWidth: "400px",
-    margin: "40px auto",
-    background: "#fff",
+  page: {
+    minHeight: "calc(100vh - 64px)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     padding: "20px",
-    borderRadius: "6px",
+  },
+  card: {
+    width: "100%",
+    maxWidth: "420px",
+    background: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: "12px",
+    padding: "32px",
+  },
+  title: {
+    margin: 0,
+    fontSize: "24px",
+    fontWeight: "600",
+  },
+  subtitle: {
+    marginTop: "6px",
+    marginBottom: "24px",
+    fontSize: "14px",
+    color: "#6b7280",
   },
   error: {
-    color: "red",
+    background: "#fee2e2",
+    color: "#b91c1c",
+    padding: "10px",
+    borderRadius: "6px",
+    fontSize: "14px",
+    marginBottom: "16px",
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "14px",
+  },
+  input: {
+    padding: "10px 12px",
+    fontSize: "14px",
+    borderRadius: "8px",
+    border: "1px solid #d1d5db",
+    outline: "none",
+  },
+  button: {
+    marginTop: "6px",
+    padding: "10px",
+    fontSize: "14px",
+    fontWeight: "500",
+    background: "#4f46e5",
+    color: "#ffffff",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+  },
+  footer: {
+    marginTop: "20px",
+    fontSize: "14px",
+    textAlign: "center",
+    color: "#6b7280",
+  },
+  link: {
+    color: "#4f46e5",
+    textDecoration: "none",
+    fontWeight: "500",
   },
 };
 
