@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
 import { AuthContext } from "../context/AuthContext";
@@ -8,8 +8,14 @@ function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const { login } = useContext(AuthContext);
+  const { login, token } = useContext(AuthContext);
   const navigate = useNavigate();
+  
+  useEffect(() => {
+  if (token) {
+    navigate("/");
+  }
+}, [token, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,6 +33,8 @@ function Login() {
       setError("Invalid username or password");
     }
   };
+
+  if (token) return null;
 
   return (
     <div style={styles.page}>

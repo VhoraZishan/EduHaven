@@ -1,13 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect, useContext  } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
+import { AuthContext } from "../context/AuthContext";
+
 
 function Register() {
+  const { token } = useContext(AuthContext);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+  if (token) {
+    navigate("/");
+  }
+}, [token, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,6 +33,8 @@ function Register() {
       setError("Registration failed. Try a different username.");
     }
   };
+
+  if (token) return null;
 
   return (
     <div style={styles.page}>
