@@ -17,3 +17,4 @@ api.interceptors.request.use(
 );
 
 export default api;
+export const BACKEND_URL = "http://localhost:8000";

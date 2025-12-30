@@ -6,17 +6,20 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 
 from .auth_serializers import RegisterSerializer, LoginSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from accounts.serializers import ProfileSerializer
 from posts.models import Post
 from comments.models import Comment
 from posts.serializers import PostSerializer
 from comments.serializers import CommentSerializer
-from .serializers import AvatarSerializer
+from .serializers import AvatarSerializer, PublicUserSerializer
 
 from rest_framework.parsers import MultiPartParser, FormParser
 
+from django.contrib.auth.models import User
+
 class RegisterView(APIView):
+    permission_classes = [AllowAny]
     def post(self,request):
         serializer =RegisterSerializer(data=request.data)
 
@@ -35,6 +38,7 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
+    permission_classes = [AllowAny]
     def post(self,request):
         serializer = LoginSerializer(data= request.data)
 
@@ -91,3 +95,15 @@ class AvatarUpdateView(APIView):
             return Response(serializer.data)
 
         return Response(serializer.errors, status=400)
+
+class PublicUserView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found"}, status=404)
+
+        serializer = PublicUserSerializer(user)
+        return Response(serializer.data)

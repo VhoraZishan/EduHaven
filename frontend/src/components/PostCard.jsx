@@ -1,21 +1,22 @@
 import { useNavigate } from "react-router-dom";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 function PostCard({ post }) {
   const navigate = useNavigate();
+  const { userMap, ensureUser } = useContext(AuthContext);
 
-  const handleClick = () => {
-    navigate(`/posts/${post.id}`);
-  };
+  // 🔹 ASK FOR USERNAME WHEN COMPONENT LOADS
+  useEffect(() => {
+    ensureUser(post.author);
+  }, [post.author]);
 
   return (
-    <div style={styles.card} onClick={handleClick}>
+    <div onClick={() => navigate(`/posts/${post.id}`)}>
       <h3>{post.title}</h3>
-
-      <p style={styles.meta}>
-        Author ID: {post.author} •{" "}
-        {new Date(post.created_at).toLocaleString()}
+      <p>
+        Author: {userMap[post.author] || "Loading..."}
       </p>
-
       <p>{post.body.slice(0, 120)}...</p>
     </div>
   );
