@@ -1,12 +1,40 @@
+:root {
+  /* Kinetic Academic Color Palette */
+  --bg-color: #fafafa;
+  --text-main: #111827;
+  --accent-primary: #225255; /* Forest Green / Teal */
+  
+  /* Category Colors */
+  --cat-discussion: #A7F3D0;
+  --cat-question: #E9D8FD;
+  --cat-resource: #FED7AA;
+  --cat-meme: #F3F4F6;
+  --cat-news: #FED7E2;
+  --cat-poll: #2D5A27;
+
+  /* Secondary Bg */
+  --bg-legal: #FEF3C7;
+  --bg-postit: #FCE7F3;
+
+  /* Borders & Shadows */
+  --brutal-border: 2px solid #000;
+  --brutal-shadow: 4px 4px 0px #000;
+  --brutal-shadow-hover: 6px 6px 0px #000;
+  --brutal-shadow-active: 1px 1px 0px #000;
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI";
-  background: #f8fafc;
-  color: #111827;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--text-main);
+  background-color: var(--bg-color);
+  /* Dotted grid background */
+  background-image: radial-gradient(#d1d5db 2px, transparent 0);
+  background-size: 24px 24px;
 }
 
 a {
@@ -14,37 +42,71 @@ a {
   color: inherit;
 }
 
+/* Base Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 800;
+  margin-top: 0;
+}
+
+/* Neo-Brutalist Buttons */
 button {
   font-family: inherit;
-  background: #4f46e5;
+  font-weight: 700;
+  background: var(--accent-primary);
   color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
+  border: var(--brutal-border);
+  padding: 10px 18px;
+  border-radius: 9999px; /* Pill shape */
+  box-shadow: var(--brutal-shadow);
   cursor: pointer;
+  transition: all 0.1s ease-in-out;
 }
 
 button:hover {
-  background: #4338ca;
+  transform: translate(-2px, -2px);
+  box-shadow: var(--brutal-shadow-hover);
+}
+
+button:active {
+  transform: translate(3px, 3px);
+  box-shadow: var(--brutal-shadow-active);
 }
 
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: var(--brutal-shadow);
 }
 
+/* Neo-brutalist Inputs */
 input,
 textarea {
   width: 100%;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #e5e7eb;
+  padding: 12px;
+  border-radius: 8px;
+  border: var(--brutal-border);
+  box-shadow: 3px 3px 0px rgba(0,0,0,0.1);
   font-family: inherit;
   margin-bottom: 12px;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  background: white;
 }
 
 input:focus,
 textarea:focus {
   outline: none;
-  border-color: #4f46e5;
+  box-shadow: var(--brutal-shadow);
+  transform: translate(-1px, -1px);
+}
+
+/* Utility Card Class */
+.brutal-card {
+  background: white;
+  border: var(--brutal-border);
+  box-shadow: var(--brutal-shadow);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
 }

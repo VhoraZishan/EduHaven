@@ -45,23 +45,39 @@ function Feed() {
 const styles = {
   page: {
     maxWidth: "900px",
-    margin: "30px auto",
+    margin: "40px auto",
     padding: "0 20px",
   },
   title: {
-    fontSize: "24px",
-    fontWeight: "600",
+    fontSize: "32px",
+    fontWeight: "800",
     marginBottom: "24px",
+    letterSpacing: "-0.5px",
+    textTransform: "uppercase",
   },
   feed: {
     display: "flex",
     flexDirection: "column",
-    gap: "16px",
+    gap: "24px",
   },
   loading: {
-    padding: "40px",
+    padding: "60px",
     textAlign: "center",
+    fontWeight: "700",
+    fontSize: "18px",
   },
+  createButton: {
+    padding: "10px 20px",
+    background: "var(--cat-question)",
+    color: "#000",
+    borderRadius: "9999px",
+    border: "var(--brutal-border)",
+    boxShadow: "var(--brutal-shadow)",
+    cursor: "pointer",
+    fontWeight: "800",
+    fontSize: "15px",
+    textTransform: "uppercase",
+  }
 };
 
 export default Feed;

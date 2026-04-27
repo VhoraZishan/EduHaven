@@ -170,22 +170,22 @@ function CreatePost() {
 }
 
 const styles = {
-  page: { minHeight: "calc(100vh - 64px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px" },
-  card: { width: "100%", maxWidth: "700px", background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "12px", padding: "32px" },
-  title: { margin: 0, fontSize: "24px", fontWeight: "600" },
-  subtitle: { marginTop: "6px", marginBottom: "24px", fontSize: "14px", color: "#6b7280" },
-  error: { background: "#fee2e2", color: "#b91c1c", padding: "10px", borderRadius: "6px", fontSize: "14px", marginBottom: "16px" },
+  page: { minHeight: "calc(100vh - 70px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px" },
+  card: { width: "100%", maxWidth: "700px", background: "#ffffff", border: "var(--brutal-border)", boxShadow: "var(--brutal-shadow)", borderRadius: "12px", padding: "32px" },
+  title: { margin: 0, fontSize: "28px", fontWeight: "800", letterSpacing: "-0.5px" },
+  subtitle: { marginTop: "6px", marginBottom: "24px", fontSize: "15px", color: "#4b5563", fontWeight: "500" },
+  error: { background: "var(--cat-news)", color: "#9f1239", padding: "12px", borderRadius: "6px", fontSize: "14px", marginBottom: "16px", border: "var(--brutal-border)", boxShadow: "2px 2px 0px #000", fontWeight: "600" },
   form: { display: "flex", flexDirection: "column", gap: "16px" },
-  input: { padding: "12px", fontSize: "15px", borderRadius: "8px", border: "1px solid #d1d5db", appearance: "auto" },
-  quillWrapper: { background: 'white' },
+  input: { padding: "12px", fontSize: "15px", borderRadius: "8px", border: "var(--brutal-border)", boxShadow: "2px 2px 0px rgba(0,0,0,1)", appearance: "auto", fontWeight: "500" },
+  quillWrapper: { background: "white", border: "var(--brutal-border)", boxShadow: "2px 2px 0px rgba(0,0,0,1)", borderRadius: "8px" },
   mediaContainer: { display: 'flex', flexDirection: 'column', gap: '10px' },
-  mediaToolbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f9fafb', padding: '10px 14px', borderRadius: '8px', border: '1px solid #e5e7eb' },
+  mediaToolbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--cat-meme)', padding: '10px 14px', borderRadius: '8px', border: 'var(--brutal-border)' },
   toolbarLeft: { display: 'flex', gap: '16px' },
-  iconBtn: { background: 'none', border: 'none', color: '#4b5563', display: 'flex', alignItems: 'center', gap: '6px', padding: '4px', borderRadius: '4px', transition: 'all 0.2s' },
-  previewArea: { display: 'flex', flexWrap: 'wrap', gap: '10px', fontSize: '13px', color: '#6b7280', padding: '0 8px' },
-  badge: { background: '#e0e7ff', color: '#4338ca', padding: '4px 8px', borderRadius: '12px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '6px' },
-  clearBadge: { cursor: 'pointer', background: '#c7d2fe', borderRadius: '50%', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' },
-  submitButton: { marginTop: "10px", padding: "12px", fontSize: "16px", fontWeight: "600", background: "#4f46e5", color: "#ffffff", border: "none", borderRadius: "8px", cursor: "pointer" },
+  iconBtn: { background: 'white', border: 'var(--brutal-border)', color: '#000', display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', borderRadius: '4px', transition: 'transform 0.1s ease', boxShadow: "2px 2px 0px #000", fontWeight: "700" },
+  previewArea: { display: 'flex', flexWrap: 'wrap', gap: '10px', fontSize: '13px', color: '#000', padding: '0 8px', fontWeight: "600" },
+  badge: { background: 'var(--cat-discussion)', color: '#000', padding: '4px 10px', borderRadius: '12px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', border: "var(--brutal-border)" },
+  clearBadge: { cursor: 'pointer', background: '#000', color: "white", borderRadius: '50%', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' },
+  submitButton: { marginTop: "16px", padding: "14px", fontSize: "16px", fontWeight: "800", background: "var(--accent-primary)", color: "#ffffff", border: "var(--brutal-border)", boxShadow: "var(--brutal-shadow)", borderRadius: "9999px", cursor: "pointer", textTransform: "uppercase" },
 };
 
 export default CreatePost;
