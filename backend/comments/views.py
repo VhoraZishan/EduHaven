@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.shortcuts import render
 
 from rest_framework.views import APIView
@@ -30,7 +31,7 @@ class PostCommentListView(APIView):
 
     def get(self, request, post_id):
         comments = Comment.objects.filter(post_id=post_id).order_by('created_at')
-        serializer = CommentSerializer(comments, many=True)
+        serializer = CommentSerializer(comments, many=True, context={'request': request})
         return Response(serializer.data)
 
 class CommentDetailView(APIView):
@@ -51,7 +52,7 @@ class CommentDetailView(APIView):
         if not comment:
             return Response({"detail": "Comment not found"}, status=404)
 
-        serializer = CommentSerializer(comment)
+        serializer = CommentSerializer(comment, context={'request': request})
         return Response(serializer.data)
 
     def put(self, request, pk):
@@ -64,7 +65,7 @@ class CommentDetailView(APIView):
 
         serializer = CommentSerializer(comment, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(edited_at=timezone.now())
             return Response(serializer.data)
 
         return Response(serializer.errors, status=400)
@@ -79,3 +80,35 @@ class CommentDetailView(APIView):
 
         comment.delete()
         return Response(status=204)
+
+class CommentUpvoteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            comment = Comment.objects.get(pk=pk)
+        except Comment.DoesNotExist:
+            return Response({"detail": "Comment not found"}, status=404)
+
+        if request.user in comment.upvoted_by.all():
+            comment.upvoted_by.remove(request.user)
+        else:
+            comment.upvoted_by.add(request.user)
+            comment.downvoted_by.remove(request.user)
+        return Response({"status": "voted"})
+
+class CommentDownvoteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            comment = Comment.objects.get(pk=pk)
+        except Comment.DoesNotExist:
+            return Response({"detail": "Comment not found"}, status=404)
+
+        if request.user in comment.downvoted_by.all():
+            comment.downvoted_by.remove(request.user)
+        else:
+            comment.downvoted_by.add(request.user)
+            comment.upvoted_by.remove(request.user)
+        return Response({"status": "voted"})

@@ -1,0 +1,184 @@
+--- docs\EduHaven_Platform_Design.docx ---
+
+EduHaven
+Platform Design Document
+Communication · Structure · Feed · Communities · Verification · Monetization
+Version 1.0  |  March 2026
+
+1. Content Model — Post Types
+EduHaven supports six distinct post types. Every post must be education-related in some way — academic, cultural, political, informational, or recreational learning. The post type is chosen by the author at creation time and displayed visibly on every post card.
+
+
+All post types are equal in access. No type is locked behind verification or premium. Content only requires an education-relevant angle.
+
+2. Communication System
+Communication on EduHaven is structured in two layers: the post itself (the primary content unit) and the response layer beneath it.
+
+2.1 Post Layer
+Every post has a title, a body (rich text), a type tag, subject tags, and community assignment.
+Rich text supports: headings, bold/italic, bullet lists, code blocks, LaTeX math notation, embedded images, embedded video (YouTube/link), and hyperlinks.
+Posts can be edited by the author. Edit history is visible to readers.
+Posts can be locked by moderators (no new comments), pinned, or marked as Resolved (for Questions).
+
+2.2 Response Layer — Comments & Answers
+
+2.3 Interactions
+Every post and every comment/answer supports the following interactions:
+
+
+Upvote/Downvote: visible net score shown on post. Raw counts shown on hover.
+Bookmark: saved to user's private bookmark list, accessible from their profile.
+Share: generates a shareable link. Can share to clipboard or external platforms.
+Report: sends to moderation queue with reason selection.
+Comments additionally support: Reply (one level deep on Discussions, unlimited on Answers).
+
+3. Platform Structure — Communities & Feed
+3.1 Communities (Spaces)
+EduHaven is organized into Communities — subject-based spaces that users can browse and join. They work similarly to Reddit's subreddits but are purpose-built for education.
+
+
+3.2 Global Tags
+Beyond community-specific tags, a set of global cross-community tags exist for universal filtering:
+
+
+Users can also create custom tags within posts. Popular custom tags surface over time and may be promoted to official community tags by moderators.
+
+3.3 The Global Feed
+The Global Feed is the homepage of EduHaven — a single unified feed of posts from all communities. It is the equivalent of Reddit's r/all or Twitter's main timeline.
+
+Feed Sorting Modes
+Users can switch between the following sorting modes at any time:
+
+
+3.4 Community Feed vs. Global Feed
+
+4. Discovery System
+EduHaven is a knowledge platform. Users must be able to find things easily. Discovery works at multiple levels:
+
+
+5. User Identity & Verification System
+EduHaven uses a layered identity system. Every user has a role tag and optionally an institutional affiliation tag. These increase trust and signal context, but do not restrict access to content.
+
+5.1 Role Tags
+Every user selects a primary role tag displayed on their profile and posts. Multiple can be held.
+
+
+Role tags are self-declared by default. They become verified through the verification process described below.
+
+5.2 Institutional Affiliation Tags
+Users can link their account to an educational institution — a university, school, college, or research body. Examples:
+
+Student @ MIT · Class of 2026
+Faculty @ University of Edinburgh
+Alumnus @ IIT Bombay
+
+Affiliation tags are displayed on the user's profile and optionally on their posts. They signal credibility without gatekeeping content.
+
+5.3 Verification Process
+Verification confirms that a user's role tag and/or institutional affiliation is genuine. It is optional but encouraged.
+
+
+Verification data is handled with strict privacy. Documents are reviewed and then deleted. EduHaven stores only the verified status, not the document itself.
+
+5.4 What Verification Unlocks
+
+6. Monetization Model
+Core principle: All content on EduHaven is free to access. No post, community, or feature that affects learning is ever paywalled.
+
+6.1 Revenue Streams
+
+6.2 EduHaven Premium — What it Unlocks
+Premium is purely cosmetic and convenience-based. It does not provide any academic advantage or content access advantage.
+
+
+Premium users do NOT get: boosted feed ranking, access to exclusive content, ability to bypass moderation, or any academic benefit.
+
+7. Moderation & Safety
+EduHaven's moderation philosophy is minimal intervention. Content is never removed for being controversial, offensive, or politically inconvenient. Moderation exists only to enforce the core prohibited list.
+
+
+8. Platform Summary
+A single-page summary of all platform design decisions made in this document.
+
+
+This document defines EduHaven's complete platform design.
+All implementation decisions should refer to this specification.
+
+--- docs\EduHaven_Product_Foundation.docx ---
+
+EduHaven
+Product Foundation Document
+Version 1.0  |  March 2026
+
+1. Vision
+EduHaven is a free, open, and student-first knowledge forum — a place where anyone can learn, share, ask, and discuss without barriers, institutional bias, or censorship. It exists to hold education and the free exchange of ideas at the highest regard.
+
+"A haven for every learner. No gatekeepers. No bias. Just knowledge."
+
+2. Mission
+To build the most open and trustworthy educational discussion platform on the internet — one that students, self-learners, and curious minds can rely on as a completely independent, community-driven resource.
+3. Core Ideals
+These are the non-negotiable principles that EduHaven is built on. Every product decision must be measured against them.
+
+
+4. Target Audience
+Primary — Students
+The core audience. EduHaven is built for students at all levels: high school, university, and beyond. They come to ask questions, discuss topics, share notes, find study guidance, and connect with peers studying similar subjects.
+
+Secondary — Education-Adjacent Individuals
+Tutors, recent graduates, self-learners, and hobbyists who are passionate about knowledge and learning. They contribute expertise, mentor students, and enrich the quality of discussion.
+
+Tertiary — General Public
+Anyone is welcome. Educators, professionals, and curious minds may participate, but the platform is not optimized specifically for them.
+
+5. Platform Positioning
+
+6. Community Policies
+6.1 What is Encouraged
+Asking questions on any academic or educational topic
+Sharing study materials, notes, guides, and resources
+Constructive debate and disagreement — backed by reasoning
+Helping others understand difficult concepts
+Expressing unpopular or minority academic viewpoints
+Fun, humor, and lighter educational discussion
+
+6.2 What is Prohibited
+Harassment, targeted abuse, or personal attacks on users
+Spam, low-effort trolling, or deliberate disruption
+Illegal content of any kind
+Plagiarism presented as original work without attribution
+Doxxing or sharing private personal information
+
+6.3 Moderation Philosophy
+EduHaven practices minimal moderation. Moderators do not remove content for being controversial, offensive to some, politically inconvenient, or academically unpopular. Removal is reserved strictly for content that is abusive, illegal, or constitutes spam. This policy is absolute and applies equally regardless of the viewpoint expressed.
+
+7. Product Goals
+Short-Term Goals
+Establish a stable, performant core platform
+Build the foundational community experience: posts, comments, profiles
+Ship content discovery features: tags, categories, search
+Implement reputation and quality signals: upvotes, helpful marks
+Ensure security, spam prevention, and abuse reporting are solid
+
+Long-Term Goals
+Become the go-to independent forum for student discussion globally
+Support subject-specific communities (subreddit-style spaces)
+Build resource libraries: notes, PDFs, study guides contributed by users
+Introduce peer recognition systems: badges, expertise levels
+Maintain zero institutional affiliation as scale grows
+
+8. Feature Priority Roadmap
+Features are ranked by importance to the core product experience, not by implementation order.
+
+
+9. What EduHaven Is Not
+Clarity on what EduHaven does not aim to be is as important as what it does.
+
+
+10. Success Metrics
+EduHaven measures success through the health of its community and the quality of its content, not vanity metrics.
+
+
+This document defines the foundational principles of EduHaven.
+All future product decisions should be measured against these ideals.
+

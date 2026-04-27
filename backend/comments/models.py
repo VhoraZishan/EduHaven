@@ -12,8 +12,21 @@ class Comment(models.Model):
         User,
         on_delete=models.CASCADE
     )
+    parent = models.ForeignKey(
+        'self', 
+        null=True, 
+        blank=True, 
+        on_delete=models.CASCADE, 
+        related_name='replies'
+    )
     body = models.TextField()
-    created_at =models.DateTimeField(auto_now_add=True)
+    
+    # Voting
+    upvoted_by = models.ManyToManyField(User, related_name='upvoted_comments', blank=True)
+    downvoted_by = models.ManyToManyField(User, related_name='downvoted_comments', blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.body[:30]

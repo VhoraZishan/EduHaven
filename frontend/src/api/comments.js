@@ -7,3 +7,6 @@ export const getComments = (postId) => {
 export const addComment = (postId, data) => {
   return api.post(`posts/${postId}/comments/add/`, data);
 };
+
+export const upvoteComment = (commentId) => api.post(`comments/${commentId}/upvote/`);
+export const downvoteComment = (commentId) => api.post(`comments/${commentId}/downvote/`);

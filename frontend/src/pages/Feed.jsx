@@ -21,7 +21,15 @@ function Feed() {
 
   return (
     <div style={styles.page}>
-      <h1 style={styles.title}>Global Feed</h1>
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: "24px"}}>
+        <h1 style={{...styles.title, marginBottom: 0}}>Global Feed</h1>
+        <button 
+          onClick={() => window.location.href = '/create'}
+          style={{padding: '8px 16px', background: '#4f46e5', color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold'}}
+        >
+          + Create Post
+        </button>
+      </div>
 
       {posts.length === 0 && <p>No posts yet.</p>}
 
