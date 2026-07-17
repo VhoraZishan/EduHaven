@@ -1,14 +1,14 @@
 import { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
-import { getComments, addComment, upvoteComment, downvoteComment } from "../api/comments";
-import { upvotePost, downvotePost } from "../api/posts";
+import { getComments, addComment, upvoteComment, downvoteComment, toggleAnswer } from "../api/comments";
+import { upvotePost, downvotePost, votePoll } from "../api/posts";
 import { AuthContext } from "../context/AuthContext";
 import { ThumbsUpIcon, ThumbsDownIcon } from "../components/Icons";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 
-function CommentNode({ comment, allComments, onReply, onEdit, onDelete, onUpvote, onDownvote, me, token, userMap, editingCommentId, editCommentText, setEditCommentText, handleCommentUpdate, setEditingCommentId, isAnyEditActive }) {
+function CommentNode({ comment, allComments, onReply, onEdit, onDelete, onUpvote, onDownvote, onToggleAnswer, me, token, userMap, editingCommentId, editCommentText, setEditCommentText, handleCommentUpdate, setEditingCommentId, isAnyEditActive, isPostOwner, postType }) {
   const isOwner = token && me && me.id === comment.author;
   const replies = allComments.filter(c => c.parent === comment.id);
   const [commentMenuOpen, setCommentMenuOpen] = useState(false);
@@ -70,12 +70,22 @@ function CommentNode({ comment, allComments, onReply, onEdit, onDelete, onUpvote
     );
   }
 
+  const highlightStyles = comment.is_answer ? {
+    border: '2px solid #16a34a',
+    boxShadow: '4px 4px 0px #16a34a',
+  } : {};
+
   return (
-    <div style={{...styles.commentCard, marginLeft: comment.parent ? '20px' : '0', opacity: isThisNodeLocked ? 0.45 : 1, pointerEvents: isThisNodeLocked ? 'none' : 'auto'}}>
+    <div style={{...styles.commentCard, ...highlightStyles, marginLeft: comment.parent ? '20px' : '0', opacity: isThisNodeLocked ? 0.45 : 1, pointerEvents: isThisNodeLocked ? 'none' : 'auto'}}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ flex: 1 }}>
           <p style={styles.commentBody}>{comment.body}</p>
           <div style={styles.commentMeta}>
+            {comment.is_answer && (
+              <span style={{ background: '#16a34a', color: 'white', padding: '2px 8px', borderRadius: '9999px', fontWeight: '800', marginRight: '6px', fontSize: '11px', display: 'inline-flex', alignItems: 'center' }}>
+                ✓ ANSWER
+              </span>
+            )}
             {userMap[comment.author] || "Loading..."} • {new Date(comment.created_at).toLocaleString()}
             {comment.edited_at && (
               <>
@@ -115,7 +125,7 @@ function CommentNode({ comment, allComments, onReply, onEdit, onDelete, onUpvote
         )}
       </div>
       
-      <div style={{display: 'flex', gap: '10px', marginTop: '8px', fontSize: '13px', alignItems: 'center'}}>
+      <div style={{display: 'flex', gap: '10px', marginTop: '8px', fontSize: '13px', alignItems: 'center', flexWrap: 'wrap'}}>
         <button onClick={() => onUpvote(comment.id)} style={{background: comment.has_upvoted ? '#dcfce7' : 'none', color: comment.has_upvoted ? '#166534' : 'inherit', border: '1px solid #ccc', padding: '4px 8px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '4px'}}>
           <ThumbsUpIcon filled={comment.has_upvoted} /> {comment.upvotes_count || 0}
         </button>
@@ -123,6 +133,24 @@ function CommentNode({ comment, allComments, onReply, onEdit, onDelete, onUpvote
           <ThumbsDownIcon filled={comment.has_downvoted} /> {comment.downvotes_count || 0}
         </button>
         {token && <button onClick={() => onReply(comment.id)} style={{background: 'none', border: 'none', color: '#4f46e5', cursor: 'pointer', padding: 0}}>Reply</button>}
+        
+        {isPostOwner && postType === 'question' && !comment.parent && (
+          <button 
+            onClick={() => onToggleAnswer(comment.id)} 
+            style={{
+              background: comment.is_answer ? '#fee2e2' : '#dcfce7', 
+              color: comment.is_answer ? '#991b1b' : '#166534', 
+              border: '2px solid #000', 
+              boxShadow: '1px 1px 0px #000',
+              padding: '4px 8px', 
+              borderRadius: '4px',
+              fontWeight: '700',
+              cursor: 'pointer'
+            }}
+          >
+            {comment.is_answer ? "Unmark Answer" : "Mark as Answer"}
+          </button>
+        )}
       </div>
 
       {/* Render Replies */}
@@ -138,6 +166,7 @@ function CommentNode({ comment, allComments, onReply, onEdit, onDelete, onUpvote
               onDelete={onDelete}
               onUpvote={onUpvote}
               onDownvote={onDownvote}
+              onToggleAnswer={onToggleAnswer}
               me={me}
               token={token}
               userMap={userMap}
@@ -147,6 +176,8 @@ function CommentNode({ comment, allComments, onReply, onEdit, onDelete, onUpvote
               handleCommentUpdate={handleCommentUpdate}
               setEditingCommentId={setEditingCommentId}
               isAnyEditActive={isAnyEditActive}
+              isPostOwner={isPostOwner}
+              postType={postType}
             />
           ))}
         </div>
@@ -330,11 +361,33 @@ function PostDetail() {
     setEditCommentText(comment.body);
   };
 
+  const handleToggleAnswer = async (commentId) => {
+    try {
+      await toggleAnswer(commentId);
+      fetchPostAndComments();
+    } catch (err) {
+      alert(err.response?.data?.detail || "Failed to toggle answer status.");
+    }
+  };
+
+  const handlePollVote = async (optionId) => {
+    if (!token) return alert("Please log in to vote.");
+    try {
+      await votePoll(post.id, optionId);
+      fetchPostAndComments();
+    } catch (err) {
+      alert(err.response?.data?.detail || "Failed to submit vote.");
+    }
+  };
+
   if (loading) return <p style={styles.loading}>Loading post...</p>;
   if (!post) return <p>Post not found</p>;
 
   const isPostOwner = token && me && me.id === post.author;
-  const rootComments = comments.filter(c => !c.parent);
+  // Sort comments so that answers are always on top
+  const rootComments = comments
+    .filter(c => !c.parent)
+    .sort((a, b) => (b.is_answer ? 1 : 0) - (a.is_answer ? 1 : 0));
   // True whenever ANY edit mode is active — locks out all other interactions
   const isAnyEditActive = editingPost || !!editingCommentId;
 
@@ -428,6 +481,55 @@ function PostDetail() {
 
           <div style={styles.body} dangerouslySetInnerHTML={{ __html: post.body }} />
 
+          {post.post_type === 'article' && post.link && (
+            <a 
+              href={post.link} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                gap: '16px',
+                background: '#fafafa',
+                border: 'var(--brutal-border)',
+                boxShadow: 'var(--brutal-shadow)',
+                padding: '16px',
+                marginTop: '16px',
+                marginBottom: '16px',
+                textDecoration: 'none',
+                color: 'inherit',
+                alignItems: 'center',
+                cursor: 'pointer'
+              }}
+            >
+              {post.link_image && (
+                <img 
+                  src={post.link_image} 
+                  alt={post.link_title} 
+                  style={{
+                    width: '120px',
+                    height: '120px',
+                    objectFit: 'cover',
+                    border: 'var(--brutal-border)',
+                    borderRadius: '4px',
+                    flexShrink: 0
+                  }}
+                />
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h4 style={{ margin: 0, fontSize: '18px', fontWeight: '800', color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {post.link_title || post.link}
+                </h4>
+                <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#4b5563', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.5 }}>
+                  {post.link_description || "External URL resource preview."}
+                </p>
+                <span style={{ fontSize: '12px', color: '#6b7280', display: 'block', marginTop: '10px', fontWeight: 'bold' }}>
+                  {post.link.startsWith('http') ? new URL(post.link).hostname : post.link}
+                </span>
+              </div>
+            </a>
+          )}
+
           {hasImages && (
             <div style={{ marginTop: '16px', position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <img 
@@ -458,9 +560,104 @@ function PostDetail() {
           )}
 
           {post.video && (
-             <video controls style={{width: '100%', borderRadius: '8px', marginTop: '16px'}}>
-               <source src={post.video.includes('http') ? post.video : `http://localhost:8000${post.video}`} type="video/mp4" />
-             </video>
+              <video controls style={{width: '100%', borderRadius: '8px', marginTop: '16px'}}>
+                <source src={post.video.includes('http') ? post.video : `http://localhost:8000${post.video}`} type="video/mp4" />
+              </video>
+          )}
+
+          {post.post_type === 'poll' && post.poll_options && (
+            <div 
+              style={{
+                marginTop: '20px',
+                marginBottom: '20px',
+                background: '#f9fafb',
+                border: 'var(--brutal-border)',
+                boxShadow: 'var(--brutal-shadow)',
+                padding: '24px',
+                borderRadius: '8px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px'
+              }}
+            >
+              {(() => {
+                const totalVotes = post.poll_options.reduce((sum, opt) => sum + opt.votes_count, 0);
+                const hasVoted = post.user_voted_option_id !== null && post.user_voted_option_id !== undefined;
+                
+                return (
+                  <>
+                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>Poll</span>
+                      <span style={{ fontSize: '13px', background: '#e0e7ff', color: '#4338ca', padding: '4px 10px', borderRadius: '9999px', border: '1px solid #000' }}>
+                        {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}
+                      </span>
+                    </h3>
+
+                    {post.poll_options.map((opt) => {
+                      const pct = totalVotes > 0 ? Math.round((opt.votes_count / totalVotes) * 100) : 0;
+                      const isVoted = opt.id === post.user_voted_option_id;
+
+                      if (token && !hasVoted) {
+                        return (
+                          <button
+                            key={opt.id}
+                            onClick={() => handlePollVote(opt.id)}
+                            style={{
+                              width: '100%',
+                              textAlign: 'left',
+                              padding: '12px 16px',
+                              background: 'white',
+                              color: '#111827',
+                              border: 'var(--brutal-border)',
+                              boxShadow: '2px 2px 0px #000',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              fontWeight: '700',
+                              fontSize: '14px',
+                              transition: 'transform 0.1s ease',
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center'
+                            }}
+                          >
+                            <span>{opt.text}</span>
+                            <span style={{ color: '#4b5563', fontSize: '12px' }}>Vote</span>
+                          </button>
+                        );
+                      } else {
+                        return (
+                          <div 
+                            key={opt.id}
+                            onClick={() => {
+                              if (token && isVoted) {
+                                handlePollVote(opt.id);
+                              }
+                            }}
+                            style={{ 
+                              display: 'flex', 
+                              flexDirection: 'column', 
+                              gap: '4px',
+                              cursor: (token && isVoted) ? 'pointer' : 'default'
+                            }}
+                            title={isVoted ? "Click to retract your vote" : undefined}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: '800' }}>
+                              <span style={{ color: isVoted ? '#10b981' : '#111827' }}>
+                                {isVoted && '✓ '}{opt.text}
+                              </span>
+                              <span>{pct}% ({opt.votes_count})</span>
+                            </div>
+                            <div style={{ width: '100%', height: '18px', background: '#e5e7eb', border: '1px solid #000', position: 'relative', borderRadius: '2px' }}>
+                              <div style={{ width: `${pct}%`, height: '100%', background: isVoted ? '#10b981' : '#4f46e5' }} />
+                            </div>
+                          </div>
+                        );
+                      }
+                    })}
+                  </>
+                );
+              })()}
+            </div>
           )}
 
           <div style={styles.voteBar}>
@@ -493,6 +690,7 @@ function PostDetail() {
             onDelete={handleCommentDelete}
             onUpvote={handleCommentUpvote}
             onDownvote={handleCommentDownvote}
+            onToggleAnswer={handleToggleAnswer}
             me={me}
             token={token}
             userMap={userMap}
@@ -502,6 +700,8 @@ function PostDetail() {
             handleCommentUpdate={handleCommentUpdate}
             setEditingCommentId={setEditingCommentId}
             isAnyEditActive={isAnyEditActive}
+            isPostOwner={isPostOwner}
+            postType={post.post_type}
           />
         ))}
 

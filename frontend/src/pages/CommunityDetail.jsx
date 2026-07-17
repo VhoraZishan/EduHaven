@@ -36,6 +36,9 @@ function CommunityDetail() {
       ]);
       setCommunity(comRes.data);
       setPosts(postsRes.data);
+    } catch (err) {
+      console.error("Failed to load community details", err);
+      setCommunity(null);
     } finally {
       setLoading(false);
     }
@@ -50,17 +53,21 @@ function CommunityDetail() {
 
   const handleJoin = async () => {
     if (!token) return navigate("/login");
-    const res = await joinCommunity(slug);
-    if (res.data.status === "deleted") {
-      // creator left → community was deleted
-      navigate("/communities");
-      return;
+    try {
+      const res = await joinCommunity(slug);
+      if (res.data.status === "deleted") {
+        // creator left → community was deleted
+        navigate("/communities");
+        return;
+      }
+      setCommunity((prev) => ({
+        ...prev,
+        is_member: res.data.status === "joined",
+        member_count: prev.member_count + (res.data.status === "joined" ? 1 : -1),
+      }));
+    } catch (err) {
+      alert(err.response?.data?.detail || "Failed to join/leave community.");
     }
-    setCommunity((prev) => ({
-      ...prev,
-      is_member: res.data.status === "joined",
-      member_count: prev.member_count + (res.data.status === "joined" ? 1 : -1),
-    }));
   };
 
   const handleDelete = async () => {

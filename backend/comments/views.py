@@ -112,3 +112,37 @@ class CommentDownvoteView(APIView):
             comment.downvoted_by.add(request.user)
             comment.upvoted_by.remove(request.user)
         return Response({"status": "voted"})
+
+class CommentToggleAnswerView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            comment = Comment.objects.select_related('post').get(pk=pk)
+        except Comment.DoesNotExist:
+            return Response({"detail": "Comment not found"}, status=404)
+
+        post = comment.post
+
+        # 1. Check if the post type is 'question'
+        if post.post_type != 'question':
+            return Response({"detail": "Only question posts can have marked answers."}, status=400)
+
+        # 2. Check if the requesting user is the creator of the post
+        if post.author != request.user:
+            return Response({"detail": "Only the author of the post can mark answers."}, status=403)
+
+        # 3. Toggle answer state
+        if comment.is_answer:
+            comment.is_answer = False
+            comment.save()
+            return Response({"is_answer": False, "status": "unmarked"})
+        else:
+            # Check if there are already 2 answers
+            answers_count = Comment.objects.filter(post=post, is_answer=True).count()
+            if answers_count >= 2:
+                return Response({"detail": "You can only mark up to 2 comments as answers."}, status=400)
+            
+            comment.is_answer = True
+            comment.save()
+            return Response({"is_answer": True, "status": "marked"})

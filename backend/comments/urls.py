@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import PostCommentCreateView, PostCommentListView, CommentDetailView, CommentUpvoteView, CommentDownvoteView
+from .views import PostCommentCreateView, PostCommentListView, CommentDetailView, CommentUpvoteView, CommentDownvoteView, CommentToggleAnswerView
 
 urlpatterns = [
     path('posts/<int:post_id>/comments/', PostCommentListView.as_view()),
@@ -7,4 +7,5 @@ urlpatterns = [
     path('comments/<int:pk>/', CommentDetailView.as_view()),
     path('comments/<int:pk>/upvote/', CommentUpvoteView.as_view()),
     path('comments/<int:pk>/downvote/', CommentDownvoteView.as_view()),
+    path('comments/<int:pk>/toggle-answer/', CommentToggleAnswerView.as_view()),
 ]

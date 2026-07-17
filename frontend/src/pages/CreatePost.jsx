@@ -21,6 +21,8 @@ function CreatePost() {
   const [communities, setCommunities] = useState([]);
   const [images, setImages] = useState([]);
   const [video, setVideo] = useState(null);
+  const [link, setLink] = useState("");
+  const [pollOptions, setPollOptions] = useState(["", ""]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -83,6 +85,25 @@ function CreatePost() {
       formData.append("post_type", postType);
       if (communityId) formData.append("community", communityId);
 
+      if (postType === "article") {
+        if (!link.trim()) {
+          setError("Article posts require a link.");
+          setLoading(false);
+          return;
+        }
+        formData.append("link", link.trim());
+      }
+
+      if (postType === "poll") {
+        const activeOptions = pollOptions.filter(o => o.trim() !== "");
+        if (activeOptions.length < 2) {
+          setError("A poll requires at least 2 options.");
+          setLoading(false);
+          return;
+        }
+        activeOptions.forEach((opt) => formData.append("options", opt));
+      }
+
       images.forEach((img) => formData.append("images", img));
       if (video) formData.append("video", video);
 
@@ -115,12 +136,16 @@ function CreatePost() {
           <div style={styles.row}>
             <select
               value={postType}
-              onChange={(e) => setPostType(e.target.value)}
+              onChange={(e) => {
+                setPostType(e.target.value);
+                setError("");
+              }}
               style={styles.select}
             >
               <option value="standard">Standard Post</option>
               <option value="question">Question</option>
               <option value="article">Article</option>
+              <option value="poll">Poll</option>
             </select>
 
             <select
@@ -144,6 +169,55 @@ function CreatePost() {
             onChange={(e) => setTitle(e.target.value)}
             required
           />
+
+          {postType === "article" && (
+            <input
+              style={styles.input}
+              placeholder="Article Link (URL, e.g. https://example.com)"
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
+              required
+            />
+          )}
+
+          {postType === "poll" && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: '#f9fafb', padding: '16px', border: 'var(--brutal-border)', borderRadius: '8px', boxShadow: '2px 2px 0px #000' }}>
+              <span style={{ fontWeight: '800', fontSize: '14px' }}>Poll Options (2 to 10 options):</span>
+              {pollOptions.map((option, idx) => (
+                <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <input
+                    style={{ ...styles.input, flex: 1, padding: '8px 12px' }}
+                    placeholder={`Option ${idx + 1}`}
+                    value={option}
+                    onChange={(e) => {
+                      const updated = [...pollOptions];
+                      updated[idx] = e.target.value;
+                      setPollOptions(updated);
+                    }}
+                    required={idx < 2}
+                  />
+                  {pollOptions.length > 2 && (
+                    <button
+                      type="button"
+                      onClick={() => setPollOptions(pollOptions.filter((_, i) => i !== idx))}
+                      style={{ background: '#fee2e2', color: '#dc2626', border: 'var(--brutal-border)', boxShadow: '1px 1px 0 #000', padding: '8px 12px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              ))}
+              {pollOptions.length < 10 && (
+                <button
+                  type="button"
+                  onClick={() => setPollOptions([...pollOptions, ""])}
+                  style={{ background: '#dcfce7', color: '#166534', border: 'var(--brutal-border)', boxShadow: '1px 1px 0 #000', padding: '8px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px', marginTop: '4px' }}
+                >
+                  + Add Option
+                </button>
+              )}
+            </div>
+          )}
 
           <div style={styles.quillWrapper}>
             <ReactQuill

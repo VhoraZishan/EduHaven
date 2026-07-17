@@ -33,7 +33,7 @@ class CommunityListCreateView(APIView):
 
         serializer = CommunitySerializer(data=data, context={'request': request})
         if serializer.is_valid():
-            community = serializer.save(creator=request.user)
+            community = serializer.save(creator=request.user, slug=slug)
             community.members.add(request.user)
             return Response(CommunitySerializer(community, context={'request': request}).data, status=201)
         return Response(serializer.errors, status=400)
@@ -97,10 +97,9 @@ class CommunityJoinView(APIView):
         except Community.DoesNotExist:
             return Response({'detail': 'Not found'}, status=404)
 
-        # If the creator tries to leave → delete the community
+        # Creators are not allowed to leave the community
         if request.user == community.creator:
-            community.delete()
-            return Response({'status': 'deleted'})
+            return Response({'detail': 'Creators cannot leave their community. Delete the community instead.'}, status=400)
 
         if request.user in community.members.all():
             community.members.remove(request.user)

@@ -10,10 +10,10 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = [
-            'id', 'post', 'author', 'parent', 'body', 
+            'id', 'post', 'author', 'parent', 'body', 'is_answer',
             'upvotes_count', 'downvotes_count', 'has_upvoted', 'has_downvoted', 'created_at', 'edited_at'
         ]
-        read_only_fields = ['post', 'author', 'created_at', 'edited_at', 'upvotes_count', 'downvotes_count']
+        read_only_fields = ['post', 'author', 'created_at', 'edited_at', 'upvotes_count', 'downvotes_count', 'is_answer']
 
     def get_has_upvoted(self, obj):
         request = self.context.get('request')

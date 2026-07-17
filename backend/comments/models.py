@@ -20,6 +20,7 @@ class Comment(models.Model):
         related_name='replies'
     )
     body = models.TextField()
+    is_answer = models.BooleanField(default=False)
     
     # Voting
     upvoted_by = models.ManyToManyField(User, related_name='upvoted_comments', blank=True)

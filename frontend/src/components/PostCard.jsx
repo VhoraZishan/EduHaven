@@ -92,6 +92,102 @@ function PostCard({ post }) {
           : post.body.replace(/<[^>]+>/g, '')}
       </p>
 
+      {post.post_type === 'article' && post.link && (
+        <a 
+          href={post.link} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '12px',
+            background: '#fafafa',
+            border: '2px solid #000',
+            boxShadow: '3px 3px 0px #000',
+            padding: '12px',
+            marginTop: '12px',
+            marginBottom: '12px',
+            textDecoration: 'none',
+            color: 'inherit',
+            alignItems: 'center',
+            cursor: 'pointer'
+          }}
+        >
+          {post.link_image && (
+            <img 
+              src={post.link_image} 
+              alt={post.link_title} 
+              style={{
+                width: '80px',
+                height: '80px',
+                objectFit: 'cover',
+                border: '2px solid #000',
+                borderRadius: '4px',
+                flexShrink: 0
+              }}
+            />
+          )}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h4 style={{ margin: 0, fontSize: '15px', fontWeight: '800', color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {post.link_title || post.link}
+            </h4>
+            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#4b5563', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              {post.link_description || "External URL resource preview."}
+            </p>
+            <span style={{ fontSize: '11px', color: '#6b7280', display: 'block', marginTop: '6px', fontWeight: 'bold' }}>
+              {post.link.startsWith('http') ? new URL(post.link).hostname : post.link}
+            </span>
+          </div>
+        </a>
+      )}
+
+      {post.post_type === 'poll' && post.poll_options && (
+        <div 
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            marginTop: '12px',
+            marginBottom: '12px',
+            background: '#f9fafb',
+            border: '2px solid #000',
+            boxShadow: '3px 3px 0px #000',
+            padding: '16px',
+            borderRadius: '8px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}
+        >
+          {(() => {
+            const totalVotes = post.poll_options.reduce((sum, opt) => sum + opt.votes_count, 0);
+            return (
+              <>
+                <span style={{ fontWeight: '800', fontSize: '13px', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  POLL ({totalVotes} {totalVotes === 1 ? 'vote' : 'votes'} cast)
+                </span>
+                {post.poll_options.map((opt) => {
+                  const pct = totalVotes > 0 ? Math.round((opt.votes_count / totalVotes) * 100) : 0;
+                  const isVoted = opt.id === post.user_voted_option_id;
+                  return (
+                    <div key={opt.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '700' }}>
+                        <span style={{ color: isVoted ? '#10b981' : '#111827' }}>
+                          {isVoted && '✓ '}{opt.text}
+                        </span>
+                        <span>{pct}% ({opt.votes_count})</span>
+                      </div>
+                      <div style={{ width: '100%', height: '12px', background: '#e5e7eb', border: '1px solid #000', position: 'relative' }}>
+                        <div style={{ width: `${pct}%`, height: '100%', background: isVoted ? '#10b981' : '#4f46e5' }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
+            );
+          })()}
+        </div>
+      )}
+
       <div style={styles.voteBar}>
         <button 
           onClick={handleUpvote} 

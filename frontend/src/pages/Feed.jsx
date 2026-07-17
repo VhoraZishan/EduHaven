@@ -4,12 +4,6 @@ import { getPosts } from "../api/posts";
 import PostCard from "../components/PostCard";
 import { AuthContext } from "../context/AuthContext";
 
-const ORDERINGS = [
-  { value: "new", label: "New" },
-  { value: "hot", label: "Hot" },
-  { value: "top", label: "Top" },
-];
-
 function Feed() {
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -17,9 +11,26 @@ function Feed() {
   const [loading, setLoading] = useState(true);
   const [ordering, setOrdering] = useState("new");
 
+  const tabs = [
+    { value: "new", label: "New" },
+    { value: "hot", label: "Hot" },
+    { value: "top", label: "Top" },
+  ];
+  if (token) {
+    tabs.push({ value: "following", label: "Following" });
+  }
+
+  // If user logs out while on Following, redirect them back to New
+  useEffect(() => {
+    if (!token && ordering === "following") {
+      setOrdering("new");
+    }
+  }, [token, ordering]);
+
   useEffect(() => {
     setLoading(true);
-    getPosts({ ordering })
+    const params = ordering === "following" ? { following: "true" } : { ordering };
+    getPosts(params)
       .then((res) => { setPosts(res.data); setLoading(false); })
       .catch(() => setLoading(false));
   }, [ordering]);
@@ -32,7 +43,7 @@ function Feed() {
         <div style={styles.headerRight}>
           {/* Sort tabs */}
           <div style={styles.tabs}>
-            {ORDERINGS.map(({ value, label }) => (
+            {tabs.map(({ value, label }) => (
               <button
                 key={value}
                 onClick={() => setOrdering(value)}

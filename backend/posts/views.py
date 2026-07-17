@@ -7,8 +7,9 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils import timezone
 
-from .models import Post, PostImage
+from .models import Post, PostImage, PollOption, PollVote
 from .serializers import PostSerializer
+from .utils import scrape_og_metadata
 
 
 class PostListCreateView(APIView):
@@ -19,6 +20,14 @@ class PostListCreateView(APIView):
 
     def get(self, request):
         posts = Post.objects.all()
+
+        # --- Followed Communities Filter ---
+        following = request.query_params.get('following', '').strip().lower() == 'true'
+        if following:
+            if request.user.is_authenticated:
+                posts = posts.filter(community__members=request.user)
+            else:
+                posts = posts.none()
 
         # --- Search ---
         search = request.query_params.get('search', '').strip()
@@ -67,6 +76,40 @@ class PostListCreateView(APIView):
 
         if serializer.is_valid():
             post = serializer.save(author=request.user)
+            
+            # Scrape Open Graph metadata if link is provided (Article post)
+            if post.post_type == 'article' and post.link:
+                metadata = scrape_og_metadata(post.link)
+                post.link_title = metadata.get('title')
+                post.link_description = metadata.get('description')
+                post.link_image = metadata.get('image')
+                post.save()
+
+            # Create options if it is a Poll post
+            if post.post_type == 'poll':
+                options_input = []
+                if hasattr(request.data, 'getlist'):
+                    options_input = request.data.getlist('options')
+                else:
+                    options_input = request.data.get('options', [])
+
+                if isinstance(options_input, list) and len(options_input) == 1 and isinstance(options_input[0], str) and options_input[0].startswith('['):
+                    import json
+                    try:
+                        options_input = json.loads(options_input[0])
+                    except:
+                        pass
+                elif isinstance(options_input, str):
+                    import json
+                    try:
+                        options_input = json.loads(options_input)
+                    except:
+                        options_input = [o.strip() for o in options_input.split(',') if o.strip()]
+
+                for text in options_input:
+                    if text.strip():
+                        PollOption.objects.create(post=post, text=text.strip())
+
             images = request.FILES.getlist('images')
             for img in images:
                 PostImage.objects.create(post=post, image=img)
@@ -154,3 +197,41 @@ class PostDownvoteView(APIView):
             post.downvoted_by.add(request.user)
             post.upvoted_by.remove(request.user)
         return Response({"status": "voted"})
+
+class PostVotePollView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            post = Post.objects.get(pk=pk)
+        except Post.DoesNotExist:
+            return Response({"detail": "Post not found"}, status=404)
+
+        if post.post_type != 'poll':
+            return Response({"detail": "This post is not a poll."}, status=400)
+
+        option_id = request.data.get('option_id')
+        if not option_id:
+            return Response({"detail": "option_id is required."}, status=400)
+
+        try:
+            option = PollOption.objects.get(id=option_id, post=post)
+        except PollOption.DoesNotExist:
+            return Response({"detail": "Invalid option."}, status=400)
+
+        vote, created = PollVote.objects.get_or_create(
+            user=request.user,
+            post=post,
+            defaults={'option': option}
+        )
+
+        if not created:
+            if vote.option == option:
+                vote.delete()
+                return Response({"status": "retracted", "user_voted_option_id": None})
+            else:
+                vote.option = option
+                vote.save()
+                return Response({"status": "voted", "user_voted_option_id": option.id})
+
+        return Response({"status": "voted", "user_voted_option_id": option.id})

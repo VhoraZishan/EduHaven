@@ -10,3 +10,4 @@ export const addComment = (postId, data) => {
 
 export const upvoteComment = (commentId) => api.post(`comments/${commentId}/upvote/`);
 export const downvoteComment = (commentId) => api.post(`comments/${commentId}/downvote/`);
+export const toggleAnswer = (commentId) => api.post(`comments/${commentId}/toggle-answer/`);

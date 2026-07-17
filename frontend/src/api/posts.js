@@ -23,3 +23,4 @@ export const createPost = (data) => {
 
 export const upvotePost = (postId) => api.post(`posts/${postId}/upvote/`);
 export const downvotePost = (postId) => api.post(`posts/${postId}/downvote/`);
+export const votePoll = (postId, optionId) => api.post(`posts/${postId}/vote-poll/`, { option_id: optionId });
