@@ -1,7 +1,8 @@
 import { useState, useContext, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { createPost } from "../api/posts";
+import { getCommunities } from "../api/communities";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { ImageIcon, VideoIcon } from "../components/Icons";
@@ -9,10 +10,15 @@ import { ImageIcon, VideoIcon } from "../components/Icons";
 function CreatePost() {
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const presetSlug = searchParams.get("community") || "";
 
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [postType, setPostType] = useState("standard");
+  // Store the community ID directly — avoids any slug→id lookup issues at submit time
+  const [communityId, setCommunityId] = useState("");
+  const [communities, setCommunities] = useState([]);
   const [images, setImages] = useState([]);
   const [video, setVideo] = useState(null);
   const [error, setError] = useState("");
@@ -21,24 +27,35 @@ function CreatePost() {
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
 
-  // 🔐 Redirect guests properly
+  // Redirect guests
   useEffect(() => {
-    if (!token) {
-      navigate("/login");
-    }
+    if (!token) navigate("/login");
   }, [token, navigate]);
+
+  // Load communities, then pre-select if ?community= was in URL
+  useEffect(() => {
+    getCommunities()
+      .then((r) => {
+        setCommunities(r.data);
+        if (presetSlug) {
+          const match = r.data.find((c) => c.slug === presetSlug);
+          if (match) setCommunityId(String(match.id));
+        }
+      })
+      .catch(() => {});
+  }, [presetSlug]);
 
   const handleImageSelect = (e) => {
     if (e.target.files) {
       setImages(Array.from(e.target.files));
-      setVideo(null); // Clear video if images selected
+      setVideo(null);
     }
   };
 
   const handleVideoSelect = (e) => {
     if (e.target.files && e.target.files[0]) {
       setVideo(e.target.files[0]);
-      setImages([]); // Clear images if video selected
+      setImages([]);
     }
   };
 
@@ -64,8 +81,9 @@ function CreatePost() {
       formData.append("title", title);
       formData.append("body", body);
       formData.append("post_type", postType);
-      
-      images.forEach(img => formData.append("images", img));
+      if (communityId) formData.append("community", communityId);
+
+      images.forEach((img) => formData.append("images", img));
       if (video) formData.append("video", video);
 
       const res = await createPost(formData);
@@ -87,23 +105,37 @@ function CreatePost() {
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        <h1 style={styles.title}>Create a new post</h1>
-        <p style={styles.subtitle}>
-          Share something with the EduHaven community
-        </p>
+        <h1 style={styles.heading}>Create a new post</h1>
+        <p style={styles.subtitle}>Share something with the EduHaven community</p>
 
-        {error && <div style={styles.error}>{error}</div>}
+        {error && <div style={styles.errorBox}>{error}</div>}
 
         <form onSubmit={handleSubmit} style={styles.form}>
-          <select 
-            value={postType} 
-            onChange={(e) => setPostType(e.target.value)}
-            style={styles.input}
-          >
-            <option value="standard">Standard Post</option>
-            <option value="question">Question</option>
-            <option value="article">Article</option>
-          </select>
+          {/* Row: post type + community */}
+          <div style={styles.row}>
+            <select
+              value={postType}
+              onChange={(e) => setPostType(e.target.value)}
+              style={styles.select}
+            >
+              <option value="standard">Standard Post</option>
+              <option value="question">Question</option>
+              <option value="article">Article</option>
+            </select>
+
+            <select
+              value={communityId}
+              onChange={(e) => setCommunityId(e.target.value)}
+              style={styles.select}
+            >
+              <option value="">Global (no community)</option>
+              {communities.map((c) => (
+                <option key={c.id} value={String(c.id)}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <input
             style={styles.input}
@@ -114,54 +146,60 @@ function CreatePost() {
           />
 
           <div style={styles.quillWrapper}>
-             <ReactQuill theme="snow" value={body} onChange={setBody} placeholder="Write your post..." style={{height: '200px', marginBottom: '40px'}}/>
+            <ReactQuill
+              theme="snow"
+              value={body}
+              onChange={setBody}
+              placeholder="Write your post..."
+              style={{ height: "200px", marginBottom: "40px" }}
+            />
           </div>
-          
-          <div style={styles.mediaContainer}>
-            <div style={styles.mediaToolbar}>
-               <div style={styles.toolbarLeft}>
-                 <button 
-                   type="button" 
-                   onClick={() => imageInputRef.current?.click()} 
-                   style={{...styles.iconBtn, opacity: video ? 0.4 : 1, cursor: video ? 'not-allowed' : 'pointer'}}
-                   disabled={!!video}
-                 >
-                   <ImageIcon /> <span style={{fontSize: '14px'}}>Add Images</span>
-                 </button>
-                 <input type="file" ref={imageInputRef} accept="image/*" multiple onChange={handleImageSelect} style={{display: 'none'}} />
 
-                 <button 
-                   type="button" 
-                   onClick={() => videoInputRef.current?.click()} 
-                   style={{...styles.iconBtn, opacity: images.length > 0 ? 0.4 : 1, cursor: images.length > 0 ? 'not-allowed' : 'pointer'}}
-                   disabled={images.length > 0}
-                 >
-                   <VideoIcon /> <span style={{fontSize: '14px'}}>Add Video</span>
-                 </button>
-                 <input type="file" ref={videoInputRef} accept="video/*" onChange={handleVideoSelect} style={{display: 'none'}} />
-               </div>
+          {/* Media toolbar */}
+          <div style={styles.mediaToolbar}>
+            <button
+              type="button"
+              onClick={() => imageInputRef.current?.click()}
+              style={{ ...styles.mediaBtn, opacity: video ? 0.4 : 1, cursor: video ? "not-allowed" : "pointer" }}
+              disabled={!!video}
+            >
+              <ImageIcon />
+              <span>Add Images</span>
+            </button>
+            <input type="file" ref={imageInputRef} accept="image/*" multiple onChange={handleImageSelect} style={{ display: "none" }} />
+
+            <button
+              type="button"
+              onClick={() => videoInputRef.current?.click()}
+              style={{ ...styles.mediaBtn, opacity: images.length > 0 ? 0.4 : 1, cursor: images.length > 0 ? "not-allowed" : "pointer" }}
+              disabled={images.length > 0}
+            >
+              <VideoIcon />
+              <span>Add Video</span>
+            </button>
+            <input type="file" ref={videoInputRef} accept="video/*" onChange={handleVideoSelect} style={{ display: "none" }} />
+          </div>
+
+          {/* Selected file badges */}
+          {(images.length > 0 || video) && (
+            <div style={styles.previewArea}>
+              {images.map((img, idx) => (
+                <span key={idx} style={styles.badge}>
+                  {img.name.length > 22 ? img.name.slice(0, 22) + "…" : img.name}
+                  <span onClick={() => removeImage(idx)} style={styles.badgeX}>&times;</span>
+                </span>
+              ))}
+              {video && (
+                <span style={styles.badge}>
+                  {video.name.length > 22 ? video.name.slice(0, 22) + "…" : video.name}
+                  <span onClick={removeVideo} style={styles.badgeX}>&times;</span>
+                </span>
+              )}
             </div>
-            
-            {(images.length > 0 || video) && (
-               <div style={styles.previewArea}>
-                  {images.map((img, idx) => (
-                    <span key={idx} style={styles.badge}>
-                      {img.name.length > 20 ? img.name.slice(0, 20) + "..." : img.name}
-                      <span onClick={() => removeImage(idx)} style={styles.clearBadge}>&times;</span>
-                    </span>
-                  ))}
-                  {video && (
-                    <span style={styles.badge}>
-                      {video.name.length > 20 ? video.name.slice(0, 20) + "..." : video.name}
-                      <span onClick={removeVideo} style={styles.clearBadge}>&times;</span>
-                    </span>
-                  )}
-               </div>
-            )}
-          </div>
+          )}
 
-          <button style={styles.submitButton} type="submit" disabled={loading}>
-            {loading ? "Posting…" : "Publish post"}
+          <button style={styles.submitBtn} type="submit" disabled={loading}>
+            {loading ? "Publishing..." : "Publish Post"}
           </button>
         </form>
       </div>
@@ -170,22 +208,22 @@ function CreatePost() {
 }
 
 const styles = {
-  page: { minHeight: "calc(100vh - 70px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px" },
+  page: { minHeight: "calc(100vh - 64px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px" },
   card: { width: "100%", maxWidth: "700px", background: "#ffffff", border: "var(--brutal-border)", boxShadow: "var(--brutal-shadow)", borderRadius: "12px", padding: "32px" },
-  title: { margin: 0, fontSize: "28px", fontWeight: "800", letterSpacing: "-0.5px" },
-  subtitle: { marginTop: "6px", marginBottom: "24px", fontSize: "15px", color: "#4b5563", fontWeight: "500" },
-  error: { background: "var(--cat-news)", color: "#9f1239", padding: "12px", borderRadius: "6px", fontSize: "14px", marginBottom: "16px", border: "var(--brutal-border)", boxShadow: "2px 2px 0px #000", fontWeight: "600" },
+  heading: { margin: 0, fontSize: "26px", fontWeight: "800", letterSpacing: "-0.5px" },
+  subtitle: { marginTop: "6px", marginBottom: "24px", fontSize: "14px", color: "#4b5563", fontWeight: "500" },
+  errorBox: { background: "var(--cat-news)", color: "#9f1239", padding: "12px", borderRadius: "6px", fontSize: "14px", marginBottom: "16px", border: "var(--brutal-border)", boxShadow: "2px 2px 0 #000", fontWeight: "600" },
   form: { display: "flex", flexDirection: "column", gap: "16px" },
-  input: { padding: "12px", fontSize: "15px", borderRadius: "8px", border: "var(--brutal-border)", boxShadow: "2px 2px 0px rgba(0,0,0,1)", appearance: "auto", fontWeight: "500" },
-  quillWrapper: { background: "white", border: "var(--brutal-border)", boxShadow: "2px 2px 0px rgba(0,0,0,1)", borderRadius: "8px" },
-  mediaContainer: { display: 'flex', flexDirection: 'column', gap: '10px' },
-  mediaToolbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--cat-meme)', padding: '10px 14px', borderRadius: '8px', border: 'var(--brutal-border)' },
-  toolbarLeft: { display: 'flex', gap: '16px' },
-  iconBtn: { background: 'white', border: 'var(--brutal-border)', color: '#000', display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', borderRadius: '4px', transition: 'transform 0.1s ease', boxShadow: "2px 2px 0px #000", fontWeight: "700" },
-  previewArea: { display: 'flex', flexWrap: 'wrap', gap: '10px', fontSize: '13px', color: '#000', padding: '0 8px', fontWeight: "600" },
-  badge: { background: 'var(--cat-discussion)', color: '#000', padding: '4px 10px', borderRadius: '12px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px', border: "var(--brutal-border)" },
-  clearBadge: { cursor: 'pointer', background: '#000', color: "white", borderRadius: '50%', width: '16px', height: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' },
-  submitButton: { marginTop: "16px", padding: "14px", fontSize: "16px", fontWeight: "800", background: "var(--accent-primary)", color: "#ffffff", border: "var(--brutal-border)", boxShadow: "var(--brutal-shadow)", borderRadius: "9999px", cursor: "pointer", textTransform: "uppercase" },
+  row: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" },
+  select: { padding: "11px 12px", fontSize: "14px", border: "var(--brutal-border)", boxShadow: "2px 2px 0 #000", borderRadius: "8px", fontFamily: "inherit", fontWeight: "600", background: "white", appearance: "auto" },
+  input: { padding: "12px", fontSize: "15px", borderRadius: "8px", border: "var(--brutal-border)", boxShadow: "2px 2px 0 #000", fontWeight: "500", background: "white" },
+  quillWrapper: { background: "white", border: "var(--brutal-border)", boxShadow: "2px 2px 0 #000", borderRadius: "8px" },
+  mediaToolbar: { display: "flex", gap: "12px", background: "var(--cat-meme)", padding: "10px 14px", borderRadius: "8px", border: "var(--brutal-border)" },
+  mediaBtn: { background: "white", border: "var(--brutal-border)", color: "#000", display: "flex", alignItems: "center", gap: "6px", padding: "6px 12px", borderRadius: "6px", boxShadow: "2px 2px 0 #000", fontWeight: "700", fontSize: "13px" },
+  previewArea: { display: "flex", flexWrap: "wrap", gap: "10px", fontSize: "13px" },
+  badge: { background: "var(--cat-discussion)", color: "#000", padding: "4px 10px", borderRadius: "12px", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px", border: "var(--brutal-border)" },
+  badgeX: { cursor: "pointer", background: "#000", color: "white", borderRadius: "50%", width: "16px", height: "16px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "11px" },
+  submitBtn: { marginTop: "8px", padding: "14px", fontSize: "15px", fontWeight: "800", background: "var(--accent-primary)", color: "#fff", border: "var(--brutal-border)", boxShadow: "var(--brutal-shadow)", borderRadius: "9999px", cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.05em" },
 };
 
 export default CreatePost;

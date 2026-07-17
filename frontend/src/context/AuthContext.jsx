@@ -14,6 +14,14 @@ export function AuthProvider({ children }) {
   // Cache for author ID → username
   const [userMap, setUserMap] = useState({});
 
+  const logout = () => {
+    localStorage.removeItem("token");
+    setToken(null);
+    setMe(null);
+    setProfile(null);
+    setUserMap({});
+  };
+
   // 🔹 Load current user when token changes
   useEffect(() => {
     if (!token) {
@@ -27,9 +35,13 @@ export function AuthProvider({ children }) {
         setMe(res.data.user);
         setProfile(res.data.profile);
       })
-      .catch(() => {
-        setMe(null);
-        setProfile(null);
+      .catch((err) => {
+        if (err.response && err.response.status === 401) {
+          logout();
+        } else {
+          setMe(null);
+          setProfile(null);
+        }
       });
   }, [token]);
 
@@ -51,14 +63,6 @@ export function AuthProvider({ children }) {
   const login = (newToken) => {
     localStorage.setItem("token", newToken);
     setToken(newToken);
-  };
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
-    setMe(null);
-    setProfile(null);
-    setUserMap({});
   };
 
   return (

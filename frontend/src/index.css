@@ -48,40 +48,116 @@ h1, h2, h3, h4, h5, h6 {
   margin-top: 0;
 }
 
-/* Neo-Brutalist Buttons */
+/* ============================================
+   NEO-BRUTALIST BUTTON SYSTEM
+   All buttons animate identically. Use these
+   className values throughout the app.
+   ============================================ */
+
+/* Reset + shared base for every button */
 button {
   font-family: inherit;
   font-weight: 700;
+  cursor: pointer;
+  border: var(--brutal-border);
+  border-radius: 9999px;
+  /* Transition on both transform AND box-shadow so the lift works everywhere */
+  transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+  /* Default appearance if no class is set */
   background: var(--accent-primary);
   color: white;
-  border: var(--brutal-border);
   padding: 10px 18px;
-  border-radius: 9999px; /* Pill shape */
   box-shadow: var(--brutal-shadow);
-  cursor: pointer;
-  transition: all 0.1s ease-in-out;
 }
 
-button:hover {
+button:hover:not(:disabled) {
   transform: translate(-2px, -2px);
   box-shadow: var(--brutal-shadow-hover);
 }
 
-button:active {
-  transform: translate(3px, 3px);
+button:active:not(:disabled) {
+  transform: translate(2px, 2px);
   box-shadow: var(--brutal-shadow-active);
 }
 
 button:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: var(--brutal-shadow);
+  transform: none !important;
+  box-shadow: var(--brutal-shadow) !important;
 }
 
-/* Neo-brutalist Inputs */
+/* Primary — filled teal */
+.btn-primary {
+  background: var(--accent-primary);
+  color: #fff;
+  border: var(--brutal-border);
+  box-shadow: var(--brutal-shadow);
+}
+.btn-primary:hover:not(:disabled) {
+  box-shadow: var(--brutal-shadow-hover);
+  transform: translate(-2px, -2px);
+}
+.btn-primary:active:not(:disabled) {
+  box-shadow: var(--brutal-shadow-active);
+  transform: translate(2px, 2px);
+}
+
+/* Secondary — white/outline */
+.btn-secondary {
+  background: white;
+  color: #111;
+  border: var(--brutal-border);
+  box-shadow: var(--brutal-shadow);
+}
+.btn-secondary:hover:not(:disabled) {
+  box-shadow: var(--brutal-shadow-hover);
+  transform: translate(-2px, -2px);
+}
+.btn-secondary:active:not(:disabled) {
+  box-shadow: var(--brutal-shadow-active);
+  transform: translate(2px, 2px);
+}
+
+/* Danger — red */
+.btn-danger {
+  background: #dc2626;
+  color: white;
+  border: var(--brutal-border);
+  box-shadow: var(--brutal-shadow);
+}
+.btn-danger:hover:not(:disabled) {
+  box-shadow: var(--brutal-shadow-hover);
+  transform: translate(-2px, -2px);
+}
+.btn-danger:active:not(:disabled) {
+  box-shadow: var(--brutal-shadow-active);
+  transform: translate(2px, 2px);
+}
+
+/* Ghost — no background, for icon buttons or minimal actions */
+.btn-ghost {
+  background: transparent;
+  color: #374151;
+  border: var(--brutal-border);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.15);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--cat-meme);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+  transform: translate(-2px, -2px);
+}
+.btn-ghost:active:not(:disabled) {
+  box-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+  transform: translate(2px, 2px);
+}
+
+/* ============================================
+   INPUTS
+   ============================================ */
 input,
-textarea {
+textarea,
+select {
   width: 100%;
   padding: 12px;
   border-radius: 8px;
@@ -90,18 +166,22 @@ textarea {
   font-family: inherit;
   margin-bottom: 12px;
   font-size: 15px;
-  transition: all 0.2s ease;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
   background: white;
+  appearance: auto;
 }
 
 input:focus,
-textarea:focus {
+textarea:focus,
+select:focus {
   outline: none;
   box-shadow: var(--brutal-shadow);
   transform: translate(-1px, -1px);
 }
 
-/* Utility Card Class */
+/* ============================================
+   UTILITY CARD
+   ============================================ */
 .brutal-card {
   background: white;
   border: var(--brutal-border);

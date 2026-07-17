@@ -8,6 +8,9 @@ import Register from "./auth/Register";
 import Profile from "./pages/Profile";
 import PostDetail from "./pages/PostDetail";
 import CreatePost from "./pages/CreatePost";
+import Communities from "./pages/Communities";
+import CommunityDetail from "./pages/CommunityDetail";
+import SearchPage from "./pages/Search";
 
 function App() {
   return (
@@ -21,8 +24,10 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/posts/:id" element={<PostDetail />} />
           <Route path="/create" element={<CreatePost />} />
+          <Route path="/communities" element={<Communities />} />
+          <Route path="/communities/:slug" element={<CommunityDetail />} />
+          <Route path="/search" element={<SearchPage />} />
         </Routes>
-
       </BrowserRouter>
     </AuthProvider>
   );

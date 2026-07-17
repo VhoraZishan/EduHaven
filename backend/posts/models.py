@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.apps import apps
 
 class Post(models.Model):
     POST_TYPES = (
@@ -16,7 +17,14 @@ class Post(models.Model):
     title =  models.CharField(max_length=200)
     body = models.TextField(blank=True)
     post_type = models.CharField(max_length=20, choices=POST_TYPES, default='standard')
-    
+    community = models.ForeignKey(
+        'communities.Community',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='posts'
+    )
+
     # Media support
     image = models.ImageField(upload_to='post_images/', null=True, blank=True)
     video = models.FileField(upload_to='post_videos/', null=True, blank=True)

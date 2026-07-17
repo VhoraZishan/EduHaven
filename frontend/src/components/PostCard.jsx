@@ -66,8 +66,16 @@ function PostCard({ post }) {
       style={styles.card}
       onClick={() => navigate(`/posts/${post.id}`)}
     >
-      <div style={{display: 'flex', gap: '8px', marginBottom: '8px'}}>
-         <span style={styles.postTypeBadge}>{post.post_type.toUpperCase()}</span>
+      <div style={{display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap', alignItems: 'center'}}>
+        <span style={styles.postTypeBadge}>{post.post_type.toUpperCase()}</span>
+        {post.community_name && (
+          <span
+            onClick={(e) => { e.stopPropagation(); navigate(`/communities/${post.community_slug}`); }}
+            style={styles.communityBadge}
+          >
+            {post.community_name}
+          </span>
+        )}
       </div>
 
       <h3 style={styles.title}>{post.title}</h3>
@@ -120,6 +128,17 @@ const styles = {
     color: "#000",
     boxShadow: "2px 2px 0px #000",
     textTransform: "uppercase"
+  },
+  communityBadge: {
+    background: "var(--cat-discussion)",
+    padding: "4px 10px",
+    border: "var(--brutal-border)",
+    fontSize: "12px",
+    fontWeight: "700",
+    color: "#000",
+    boxShadow: "2px 2px 0px #000",
+    cursor: "pointer",
+    borderRadius: "9999px",
   },
   title: {
     fontSize: "20px",

@@ -366,14 +366,22 @@ function PostDetail() {
             </div>
 
             <div style={{ marginTop: "20px", display: 'flex', gap: '10px' }}>
-              <button onClick={handlePostUpdate} style={{ padding: '8px 24px', background: '#4f46e5', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Save Changes</button>
-              <button onClick={() => { setEditingPost(false); setEditTitle(post.title); setEditBody(post.body); }} style={{ padding: '8px 24px', background: '#6b7280', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={handlePostUpdate} className="btn-primary" style={{ padding: '8px 24px' }}>Save Changes</button>
+              <button onClick={() => { setEditingPost(false); setEditTitle(post.title); setEditBody(post.body); }} className="btn-secondary" style={{ padding: '8px 24px' }}>Cancel</button>
             </div>
           </>
         ) : (
         <>
-          <div style={{display: 'flex', gap: '8px', marginBottom: '8px'}}>
+        <div style={{display: 'flex', gap: '8px', marginBottom: '8px', flexWrap: 'wrap', alignItems: 'center'}}>
              <span style={styles.postTypeBadge}>{post.post_type.toUpperCase()}</span>
+             {post.community_name && (
+               <span
+                 onClick={() => navigate(`/communities/${post.community_slug}`)}
+                 style={styles.communityBadge}
+               >
+                 {post.community_name}
+               </span>
+             )}
           </div>
           
           <h1 style={styles.title}>{post.title}</h1>
@@ -503,9 +511,9 @@ function PostDetail() {
             {error && <p style={styles.error}>{error}</p>}
 
             {replyToCommentId && (
-               <div style={{marginBottom: '10px', fontSize: '12px', background: '#e0e7ff', padding: '6px', borderRadius: '4px', display: 'flex', justifyContent: 'space-between'}}>
-                 <span>Replying to comment #{replyToCommentId}</span>
-                 <button type="button" onClick={() => setReplyToCommentId(null)} style={{background: 'none', border: 'none', cursor: 'pointer', color: '#4f46e5'}}>Cancel Reply</button>
+               <div style={{marginBottom: '10px', fontSize: '12px', background: 'var(--cat-meme)', padding: '6px 10px', borderRadius: '6px', border: 'var(--brutal-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                 <span style={{fontWeight: '600'}}>Replying to comment #{replyToCommentId}</span>
+                 <button type="button" onClick={() => setReplyToCommentId(null)} className="btn-secondary" style={{padding: '4px 10px', fontSize: '12px'}}>Cancel Reply</button>
                </div>
             )}
 
@@ -518,7 +526,7 @@ function PostDetail() {
               style={{width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #d1d5db', resize: 'vertical'}}
             />
 
-            <button type="submit" style={{marginTop: '10px', padding: '8px 16px', background: '#4f46e5', color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer'}}>
+            <button type="submit" className="btn-primary" style={{marginTop: '4px'}}>
               {replyToCommentId ? "Add Reply" : "Add Comment"}
             </button>
           </form>
@@ -550,6 +558,7 @@ const styles = {
   commentForm: { marginTop: "24px", display: "flex", flexDirection: "column", gap: "10px" },
   error: { color: "#dc2626", marginBottom: "8px", fontWeight: "700" },
   loginHint: { marginTop: "20px", fontSize: "15px", color: "#4b5563", fontWeight: "600" },
+  communityBadge: { background: "var(--cat-discussion)", border: "var(--brutal-border)", padding: "4px 12px", borderRadius: "9999px", fontSize: "12px", fontWeight: "700", color: "#000", boxShadow: "2px 2px 0px #000", cursor: "pointer" },
 };
 
 export default PostDetail;

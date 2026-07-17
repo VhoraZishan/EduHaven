@@ -1,8 +1,16 @@
 import api from "./axios";
 
-export const getPosts = () => {
-  return api.get("posts/");
+// Build query string from a params object, ignoring empty values
+const buildQuery = (params = {}) => {
+  const qs = Object.entries(params)
+    .filter(([, v]) => v !== '' && v !== null && v !== undefined)
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join('&');
+  return qs ? `?${qs}` : '';
 };
+
+export const getPosts = (params = {}) =>
+  api.get(`posts/${buildQuery(params)}`);
 
 export const createPost = (data) => {
   if (data instanceof FormData) {
