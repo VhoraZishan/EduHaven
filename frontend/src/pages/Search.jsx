@@ -9,6 +9,7 @@ const POST_TYPES = [
   { value: "standard", label: "Standard" },
   { value: "question", label: "Question" },
   { value: "article", label: "Article" },
+  { value: "poll", label: "Poll" },
 ];
 
 const ORDERINGS = [
