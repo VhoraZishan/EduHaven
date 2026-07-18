@@ -126,5 +126,24 @@ class PublicUserView(APIView):
         except User.DoesNotExist:
             return Response({"detail": "User not found"}, status=404)
 
-        serializer = PublicUserSerializer(user)
-        return Response(serializer.data)
+        profile_data = ProfileSerializer(user.profile, context={'request': request}).data
+        posts_data = PostSerializer(
+            Post.objects.filter(author=user).order_by('-created_at'),
+            many=True,
+            context={'request': request}
+        ).data
+        comments_data = CommentSerializer(
+            Comment.objects.filter(author=user).order_by('-created_at'),
+            many=True,
+            context={'request': request}
+        ).data
+
+        return Response({
+            "user": {
+                "id": user.id,
+                "username": user.username
+            },
+            "profile": profile_data,
+            "posts": posts_data,
+            "comments": comments_data
+        })

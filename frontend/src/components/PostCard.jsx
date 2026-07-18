@@ -96,7 +96,21 @@ function PostCard({ post }) {
 
       <div style={styles.meta}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-          <span>{userMap[post.author] || "Loading..."}</span>
+          <span
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/profile/${post.author}`);
+            }}
+            style={{
+              cursor: 'pointer',
+              textDecoration: 'underline',
+              fontWeight: '700',
+              color: 'var(--accent-primary)'
+            }}
+            title="View Profile"
+          >
+            {userMap[post.author] || "Loading..."}
+          </span>
           {roleMap[post.author] && (
             <span style={styles.roleTag}>
               {formatRole(roleMap[post.author])}
@@ -222,6 +236,9 @@ function PostCard({ post }) {
         >
           <ThumbsDownIcon filled={hasDownvoted} /> {downvotes}
         </button>
+        <div style={styles.commentCount}>
+          {post.comments_count || 0} {post.comments_count === 1 ? 'comment' : 'comments'}
+        </div>
       </div>
     </div>
   );
@@ -302,6 +319,19 @@ const styles = {
     borderRadius: '4px',
     fontSize: '11px',
     fontWeight: '800',
+  },
+  commentCount: {
+    border: "var(--brutal-border)",
+    boxShadow: "2px 2px 0px #000",
+    padding: "6px 12px",
+    borderRadius: "9999px",
+    fontSize: "14px",
+    fontWeight: "700",
+    color: "#374151",
+    background: "#f3f4f6",
+    display: "inline-flex",
+    alignItems: "center",
+    marginLeft: "auto",
   },
 };
 

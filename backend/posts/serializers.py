@@ -26,6 +26,7 @@ class PostSerializer(serializers.ModelSerializer):
     community_slug = serializers.SerializerMethodField()
     poll_options = PollOptionSerializer(many=True, read_only=True)
     user_voted_option_id = serializers.SerializerMethodField()
+    comments_count = serializers.IntegerField(source='comments.count', read_only=True)
 
     class Meta:
         model = Post
@@ -36,11 +37,11 @@ class PostSerializer(serializers.ModelSerializer):
             'link', 'link_title', 'link_description', 'link_image',
             'poll_options', 'user_voted_option_id',
             'upvotes_count', 'downvotes_count', 'has_upvoted', 'has_downvoted',
-            'created_at', 'edited_at'
+            'comments_count', 'created_at', 'edited_at'
         ]
         read_only_fields = [
             'author', 'created_at', 'upvotes_count', 'downvotes_count', 'images',
-            'link_title', 'link_description', 'link_image'
+            'link_title', 'link_description', 'link_image', 'comments_count'
         ]
 
     def get_has_upvoted(self, obj):

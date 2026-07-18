@@ -1,28 +1,48 @@
 import { useEffect, useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api, { BACKEND_URL } from "../api/axios";
 import { AuthContext } from "../context/AuthContext";
 import ProfilePostCard from "../components/ProfilePostCard";
 import ProfileCommentCard from "../components/ProfileCommentCard";
 
+const formatRole = (role) => {
+  if (!role) return "";
+  const mapping = {
+    student: "Student",
+    educator: "Educator",
+    researcher: "Researcher",
+    professional: "Professional",
+    self_learner: "Self-Learner",
+    moderator: "Moderator",
+    admin: "Admin",
+  };
+  return mapping[role] || role;
+};
+
 function Profile() {
-  const { token } = useContext(AuthContext);
+  const { token, me } = useContext(AuthContext);
+  const { userId } = useParams();
   const navigate = useNavigate();
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [showAllPosts, setShowAllPosts] = useState(false);
+  const [showAllComments, setShowAllComments] = useState(false);
+
+  const isOwnProfile = !userId || (me && me.id === parseInt(userId));
 
   useEffect(() => {
-    if (!token) return;
+    setLoading(true);
+    const endpoint = isOwnProfile ? "auth/me/" : `auth/users/${userId}/`;
 
-    api.get("auth/me/")
+    api.get(endpoint)
       .then((res) => {
         setData(res.data);
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, [token]);
+  }, [token, userId, isOwnProfile]);
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
@@ -56,7 +76,7 @@ function Profile() {
     }
   };
 
-  if (!token) return <p style={styles.center}>Please login</p>;
+  if (isOwnProfile && !token) return <p style={styles.center}>Please login</p>;
   if (loading) return <p style={styles.center}>Loading profile…</p>;
   if (!data) return <p style={styles.center}>Error loading profile</p>;
 
@@ -76,25 +96,27 @@ function Profile() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <h1 style={styles.username}>{data.user.username}</h1>
-            {data.profile.role && (data.profile.role === 'admin' || data.profile.role === 'moderator') && (
+            {data.profile.role && (!isOwnProfile || data.profile.role === 'admin' || data.profile.role === 'moderator') && (
               <span style={styles.roleBadge}>
-                {data.profile.role === 'admin' ? 'Admin' : 'Moderator'}
+                {formatRole(data.profile.role)}
               </span>
             )}
           </div>
 
-          <label style={styles.changeAvatar}>
-            {uploading ? "Uploading…" : "Change avatar"}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              style={{ display: "none" }}
-              disabled={uploading}
-            />
-          </label>
+          {isOwnProfile && (
+            <label style={styles.changeAvatar}>
+              {uploading ? "Uploading…" : "Change avatar"}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                style={{ display: "none" }}
+                disabled={uploading}
+              />
+            </label>
+          )}
 
-          {(!data.profile.role || (data.profile.role !== 'admin' && data.profile.role !== 'moderator')) ? (
+          {isOwnProfile && (!data.profile.role || (data.profile.role !== 'admin' && data.profile.role !== 'moderator')) ? (
             <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "4px" }}>
               <label style={{ fontSize: "11px", fontWeight: "800", textTransform: "uppercase", color: "#6b7280" }}>
                 Primary Role
@@ -117,28 +139,50 @@ function Profile() {
 
       {/* Posts */}
       <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>My Posts</h2>
+        <h2 style={styles.sectionTitle}>
+          {isOwnProfile ? "My Posts" : `${data.user.username}'s Posts`}
+        </h2>
 
         {data.posts.length === 0 && <p>No posts yet.</p>}
 
         <div style={styles.list}>
-          {data.posts.map((post) => (
+          {(showAllPosts ? data.posts : data.posts.slice(0, 10)).map((post) => (
             <ProfilePostCard key={post.id} post={post} />
           ))}
         </div>
+
+        {data.posts.length > 10 && (
+          <button
+            onClick={() => setShowAllPosts(!showAllPosts)}
+            style={styles.showMoreBtn}
+          >
+            {showAllPosts ? "Show Less ↑" : `Show More (${data.posts.length - 10} more) ↓`}
+          </button>
+        )}
       </section>
 
       {/* Comments */}
       <section style={styles.section}>
-        <h2 style={styles.sectionTitle}>My Comments</h2>
+        <h2 style={styles.sectionTitle}>
+          {isOwnProfile ? "My Comments" : `${data.user.username}'s Comments`}
+        </h2>
 
         {data.comments.length === 0 && <p>No comments yet.</p>}
 
         <div style={styles.list}>
-          {data.comments.map((comment) => (
+          {(showAllComments ? data.comments : data.comments.slice(0, 10)).map((comment) => (
             <ProfileCommentCard key={comment.id} comment={comment} />
           ))}
         </div>
+
+        {data.comments.length > 10 && (
+          <button
+            onClick={() => setShowAllComments(!showAllComments)}
+            style={styles.showMoreBtn}
+          >
+            {showAllComments ? "Show Less ↑" : `Show More (${data.comments.length - 10} more) ↓`}
+          </button>
+        )}
       </section>
     </div>
   );
@@ -231,6 +275,20 @@ const styles = {
     borderRadius: '8px',
     width: 'auto',
     cursor: 'pointer'
+  },
+  showMoreBtn: {
+    display: "block",
+    margin: "16px auto 0",
+    background: "white",
+    color: "#000",
+    border: "var(--brutal-border)",
+    boxShadow: "2px 2px 0px #000",
+    padding: "8px 16px",
+    borderRadius: "8px",
+    fontWeight: "700",
+    cursor: "pointer",
+    fontSize: "14px",
+    textAlign: "center",
   },
 };
 

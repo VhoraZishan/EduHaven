@@ -57,7 +57,13 @@ function CommentNode({ comment, allComments, onReply, onEdit, onDelete, onUpvote
     return (
       <div style={{...styles.commentCard, marginLeft: comment.parent ? '20px' : '0'}}>
         <p style={{...styles.commentMeta, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px'}}>
-          <span>{userMap[comment.author] || "Loading..."}</span>
+          <span
+            onClick={() => navigate(`/profile/${comment.author}`)}
+            style={{ cursor: 'pointer', textDecoration: 'underline', fontWeight: '700', color: 'var(--accent-primary)' }}
+            title="View Profile"
+          >
+            {userMap[comment.author] || "Loading..."}
+          </span>
           {roleMap[comment.author] && (
             <span style={styles.roleTag}>
               {formatRole(roleMap[comment.author])}
@@ -107,7 +113,13 @@ function CommentNode({ comment, allComments, onReply, onEdit, onDelete, onUpvote
               </span>
             )}
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              <span>{userMap[comment.author] || "Loading..."}</span>
+              <span
+                onClick={() => navigate(`/profile/${comment.author}`)}
+                style={{ cursor: 'pointer', textDecoration: 'underline', fontWeight: '700', color: 'var(--accent-primary)' }}
+                title="View Profile"
+              >
+                {userMap[comment.author] || "Loading..."}
+              </span>
               {roleMap[comment.author] && (
                 <span style={styles.roleTag}>
                   {formatRole(roleMap[comment.author])}
@@ -474,7 +486,13 @@ function PostDetail() {
           <div style={{...styles.meta, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
             <div>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                <span>{userMap[post.author] || "Loading..."}</span>
+                <span
+                  onClick={() => navigate(`/profile/${post.author}`)}
+                  style={{ cursor: 'pointer', textDecoration: 'underline', fontWeight: '700', color: 'var(--accent-primary)' }}
+                  title="View Profile"
+                >
+                  {userMap[post.author] || "Loading..."}
+                </span>
                 {roleMap[post.author] && (
                   <span style={styles.roleTag}>
                     {formatRole(roleMap[post.author])}
