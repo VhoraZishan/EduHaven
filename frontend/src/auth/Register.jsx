@@ -8,6 +8,7 @@ function Register() {
   const { token } = useContext(AuthContext);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("student");
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ function Register() {
       await api.post("auth/register/", {
         username,
         password,
+        role,
       });
 
       navigate("/login");
@@ -38,8 +40,12 @@ function Register() {
 
   return (
     <div style={styles.page}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Create an account</h1>
+      <div style={{ width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column' }}>
+        <button onClick={() => navigate(-1)} style={styles.backBtn}>
+          ← Back
+        </button>
+        <div style={styles.card}>
+          <h1 style={styles.title}>Create an account</h1>
         <p style={styles.subtitle}>
           Join EduHaven and start posting
         </p>
@@ -64,6 +70,24 @@ function Register() {
             required
           />
 
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: '#6b7280', textTransform: 'uppercase' }}>
+              Primary Role
+            </label>
+            <select
+              style={styles.select}
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              required
+            >
+              <option value="student">Student</option>
+              <option value="educator">Educator</option>
+              <option value="researcher">Researcher</option>
+              <option value="professional">Professional</option>
+              <option value="self_learner">Self-Learner</option>
+            </select>
+          </div>
+
           <button style={styles.button} type="submit">
             Sign up
           </button>
@@ -76,6 +100,7 @@ function Register() {
           </Link>
         </p>
       </div>
+      </div>
     </div>
   );
 }
@@ -84,18 +109,34 @@ const styles = {
   page: {
     minHeight: "calc(100vh - 70px)",
     display: "flex",
+    flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     padding: "20px",
   },
   card: {
     width: "100%",
-    maxWidth: "420px",
     background: "#ffffff",
     border: "var(--brutal-border)",
     borderRadius: "12px",
     padding: "32px",
     boxShadow: "var(--brutal-shadow)",
+  },
+  backBtn: {
+    alignSelf: 'flex-start',
+    marginBottom: '20px',
+    background: 'white',
+    color: '#111827',
+    border: 'var(--brutal-border)',
+    boxShadow: '2px 2px 0px #000',
+    padding: '8px 16px',
+    borderRadius: '9999px',
+    fontWeight: '700',
+    cursor: 'pointer',
+    fontSize: '13px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px'
   },
   title: {
     margin: 0,
@@ -153,6 +194,19 @@ const styles = {
     color: "var(--accent-primary)",
     textDecoration: "underline",
     fontWeight: "800",
+  },
+  select: {
+    padding: "12px",
+    fontSize: "15px",
+    borderRadius: "8px",
+    border: "var(--brutal-border)",
+    boxShadow: "2px 2px 0px rgba(0,0,0,1)",
+    background: "white",
+    fontWeight: "600",
+    fontFamily: "inherit",
+    appearance: "auto",
+    cursor: "pointer",
+    width: "100%",
   },
 };
 

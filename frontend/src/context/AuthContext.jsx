@@ -13,6 +13,7 @@ export function AuthProvider({ children }) {
 
   // Cache for author ID → username
   const [userMap, setUserMap] = useState({});
+  const [roleMap, setRoleMap] = useState({});
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -20,6 +21,7 @@ export function AuthProvider({ children }) {
     setMe(null);
     setProfile(null);
     setUserMap({});
+    setRoleMap({});
   };
 
   // 🔹 Load current user when token changes
@@ -55,6 +57,10 @@ export function AuthProvider({ children }) {
         ...prev,
         [res.data.id]: res.data.username,
       }));
+      setRoleMap((prev) => ({
+        ...prev,
+        [res.data.id]: res.data.role,
+      }));
     } catch (err) {
       console.error("Failed to load user", userId);
     }
@@ -73,7 +79,10 @@ export function AuthProvider({ children }) {
         logout,
         me,
         profile,
+        setProfile,
         userMap,
+        roleMap,
+        setRoleMap,
         ensureUser,
       }}
     >

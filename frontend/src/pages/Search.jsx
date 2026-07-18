@@ -95,6 +95,9 @@ function SearchPage() {
 
   return (
     <div style={styles.page}>
+      <button onClick={() => navigate(-1)} style={styles.backBtn}>
+        ← Back
+      </button>
       <h1 style={styles.title}>Search</h1>
 
       {/* Search bar */}
@@ -250,6 +253,7 @@ const styles = {
   emptyState: { display: "flex", alignItems: "center", justifyContent: "center", padding: "80px 0" },
   hint: { color: "#9ca3af", fontSize: "15px", textAlign: "center" },
   communityTag: { background: "var(--cat-discussion)", border: "var(--brutal-border)", borderRadius: "9999px", padding: "2px 12px", fontSize: "12px", fontWeight: "700", cursor: "pointer", display: "inline-block", boxShadow: "2px 2px 0 #000" },
+  backBtn: { marginBottom: '20px', background: 'white', color: '#111827', border: 'var(--brutal-border)', boxShadow: '2px 2px 0px #000', padding: '8px 16px', borderRadius: '9999px', fontWeight: '700', cursor: 'pointer', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' },
 };
 
 export default SearchPage;

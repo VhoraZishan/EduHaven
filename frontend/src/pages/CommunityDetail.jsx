@@ -110,6 +110,9 @@ function CommunityDetail() {
           ? <img src={`${BACKEND_URL}${community.banner}`} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           : <div style={styles.bannerPlaceholder} />
         }
+        <button onClick={() => navigate(-1)} style={styles.backBtnBanner}>
+          ← Back
+        </button>
       </div>
 
       <div style={styles.page}>
@@ -270,8 +273,9 @@ function CommunityDetail() {
 
 const styles = {
   loading: { padding: "60px", textAlign: "center", color: "#6b7280" },
-  banner: { height: "180px", overflow: "hidden" },
+  banner: { height: "180px", overflow: "hidden", position: "relative" },
   bannerPlaceholder: { width: "100%", height: "100%", background: "linear-gradient(135deg, var(--cat-discussion) 0%, var(--cat-question) 100%)" },
+  backBtnBanner: { position: 'absolute', top: '20px', left: '24px', background: 'white', color: '#111827', border: 'var(--brutal-border)', boxShadow: '2px 2px 0px #000', padding: '8px 16px', borderRadius: '9999px', fontWeight: '700', cursor: 'pointer', fontSize: '13px', zIndex: 10 },
   page: { maxWidth: "1100px", margin: "0 auto", padding: "0 24px 40px" },
 
   comHeader: { display: "flex", alignItems: "flex-end", gap: "20px", marginTop: "-36px", marginBottom: "28px", flexWrap: "wrap" },

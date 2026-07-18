@@ -81,6 +81,9 @@ function Communities() {
 
   return (
     <div style={styles.page}>
+      <button onClick={() => navigate(-1)} style={styles.backBtn}>
+        ← Back
+      </button>
       {/* Header */}
       <div style={styles.header}>
         <div>
@@ -238,6 +241,7 @@ const styles = {
   cardTitle: { margin: "4px 0 6px", fontWeight: "800", fontSize: "16px" },
   cardDesc: { fontSize: "13px", color: "#6b7280", margin: "0 0 8px", lineHeight: "1.5", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" },
   cardMeta: { fontSize: "12px", color: "#9ca3af", display: "flex", gap: "6px", marginBottom: "12px" },
+  backBtn: { marginBottom: '20px', background: 'white', color: '#111827', border: 'var(--brutal-border)', boxShadow: '2px 2px 0px #000', padding: '8px 16px', borderRadius: '9999px', fontWeight: '700', cursor: 'pointer', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' },
 };
 
 export default Communities;

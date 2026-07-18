@@ -4,9 +4,23 @@ import { AuthContext } from "../context/AuthContext";
 import { upvotePost, downvotePost } from "../api/posts";
 import { ThumbsUpIcon, ThumbsDownIcon } from "./Icons";
 
+const formatRole = (role) => {
+  if (!role) return "";
+  const mapping = {
+    student: "Student",
+    educator: "Educator",
+    researcher: "Researcher",
+    professional: "Professional",
+    self_learner: "Self-Learner",
+    moderator: "Moderator",
+    admin: "Admin",
+  };
+  return mapping[role] || role;
+};
+
 function PostCard({ post }) {
   const navigate = useNavigate();
-  const { userMap, ensureUser, token } = useContext(AuthContext);
+  const { userMap, roleMap, ensureUser, token } = useContext(AuthContext);
 
   const [hasUpvoted, setHasUpvoted] = useState(post.has_upvoted);
   const [hasDownvoted, setHasDownvoted] = useState(post.has_downvoted);
@@ -81,7 +95,14 @@ function PostCard({ post }) {
       <h3 style={styles.title}>{post.title}</h3>
 
       <div style={styles.meta}>
-        <span>{userMap[post.author] || "Loading..."}</span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+          <span>{userMap[post.author] || "Loading..."}</span>
+          {roleMap[post.author] && (
+            <span style={styles.roleTag}>
+              {formatRole(roleMap[post.author])}
+            </span>
+          )}
+        </span>
         <span>•</span>
         <span>{new Date(post.created_at).toLocaleString()}</span>
       </div>
@@ -272,7 +293,16 @@ const styles = {
     fontSize: "15px",
     fontWeight: "700",
     transition: "transform 0.1s ease",
-  }
+  },
+  roleTag: {
+    background: '#e0e7ff',
+    border: '1px solid #000',
+    color: '#4338ca',
+    padding: '1px 8px',
+    borderRadius: '4px',
+    fontSize: '11px',
+    fontWeight: '800',
+  },
 };
 
 export default PostCard;

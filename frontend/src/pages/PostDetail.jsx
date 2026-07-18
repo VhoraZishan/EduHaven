@@ -8,7 +8,21 @@ import { ThumbsUpIcon, ThumbsDownIcon } from "../components/Icons";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 
-function CommentNode({ comment, allComments, onReply, onEdit, onDelete, onUpvote, onDownvote, onToggleAnswer, me, token, userMap, editingCommentId, editCommentText, setEditCommentText, handleCommentUpdate, setEditingCommentId, isAnyEditActive, isPostOwner, postType }) {
+const formatRole = (role) => {
+  if (!role) return "";
+  const mapping = {
+    student: "Student",
+    educator: "Educator",
+    researcher: "Researcher",
+    professional: "Professional",
+    self_learner: "Self-Learner",
+    moderator: "Moderator",
+    admin: "Admin",
+  };
+  return mapping[role] || role;
+};
+
+function CommentNode({ comment, allComments, onReply, onEdit, onDelete, onUpvote, onDownvote, onToggleAnswer, me, token, userMap, roleMap, editingCommentId, editCommentText, setEditCommentText, handleCommentUpdate, setEditingCommentId, isAnyEditActive, isPostOwner, postType }) {
   const isOwner = token && me && me.id === comment.author;
   const replies = allComments.filter(c => c.parent === comment.id);
   const [commentMenuOpen, setCommentMenuOpen] = useState(false);
@@ -42,8 +56,14 @@ function CommentNode({ comment, allComments, onReply, onEdit, onDelete, onUpvote
   if (editingCommentId === comment.id) {
     return (
       <div style={{...styles.commentCard, marginLeft: comment.parent ? '20px' : '0'}}>
-        <p style={{...styles.commentMeta, marginBottom: '8px'}}>
-          {userMap[comment.author] || "Loading..."} • Editing comment
+        <p style={{...styles.commentMeta, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px'}}>
+          <span>{userMap[comment.author] || "Loading..."}</span>
+          {roleMap[comment.author] && (
+            <span style={styles.roleTag}>
+              {formatRole(roleMap[comment.author])}
+            </span>
+          )}
+          <span>• Editing comment</span>
         </p>
         <textarea
           value={editCommentText}
@@ -86,7 +106,15 @@ function CommentNode({ comment, allComments, onReply, onEdit, onDelete, onUpvote
                 ✓ ANSWER
               </span>
             )}
-            {userMap[comment.author] || "Loading..."} • {new Date(comment.created_at).toLocaleString()}
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <span>{userMap[comment.author] || "Loading..."}</span>
+              {roleMap[comment.author] && (
+                <span style={styles.roleTag}>
+                  {formatRole(roleMap[comment.author])}
+                </span>
+              )}
+            </span>
+            {" • "}{new Date(comment.created_at).toLocaleString()}
             {comment.edited_at && (
               <>
                 {" "}•{" "}
@@ -170,6 +198,7 @@ function CommentNode({ comment, allComments, onReply, onEdit, onDelete, onUpvote
               me={me}
               token={token}
               userMap={userMap}
+              roleMap={roleMap}
               editingCommentId={editingCommentId}
               editCommentText={editCommentText}
               setEditCommentText={setEditCommentText}
@@ -189,7 +218,7 @@ function CommentNode({ comment, allComments, onReply, onEdit, onDelete, onUpvote
 function PostDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { token, me, userMap, ensureUser } = useContext(AuthContext);
+  const { token, me, userMap, roleMap, ensureUser } = useContext(AuthContext);
 
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
@@ -393,6 +422,9 @@ function PostDetail() {
 
   return (
     <div style={styles.page}>
+      <button onClick={() => navigate(-1)} style={styles.backBtn}>
+        ← Back
+      </button>
       {/* POST CARD */}
       <div style={{...styles.postCard, opacity: editingCommentId ? 0.45 : 1, pointerEvents: editingCommentId ? 'none' : 'auto'}}>
         {editingPost ? (
@@ -441,7 +473,14 @@ function PostDetail() {
 
           <div style={{...styles.meta, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
             <div>
-              <span>{userMap[post.author] || "Loading..."}</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span>{userMap[post.author] || "Loading..."}</span>
+                {roleMap[post.author] && (
+                  <span style={styles.roleTag}>
+                    {formatRole(roleMap[post.author])}
+                  </span>
+                )}
+              </span>
               <span>•</span>
               <span>{new Date(post.created_at).toLocaleString()}</span>
               {post.edited_at && (
@@ -694,6 +733,7 @@ function PostDetail() {
             me={me}
             token={token}
             userMap={userMap}
+            roleMap={roleMap}
             editingCommentId={editingCommentId}
             editCommentText={editCommentText}
             setEditCommentText={setEditCommentText}
@@ -759,6 +799,17 @@ const styles = {
   error: { color: "#dc2626", marginBottom: "8px", fontWeight: "700" },
   loginHint: { marginTop: "20px", fontSize: "15px", color: "#4b5563", fontWeight: "600" },
   communityBadge: { background: "var(--cat-discussion)", border: "var(--brutal-border)", padding: "4px 12px", borderRadius: "9999px", fontSize: "12px", fontWeight: "700", color: "#000", boxShadow: "2px 2px 0px #000", cursor: "pointer" },
+  backBtn: { marginBottom: '20px', background: 'white', color: '#111827', border: 'var(--brutal-border)', boxShadow: '2px 2px 0px #000', padding: '8px 16px', borderRadius: '9999px', fontWeight: '700', cursor: 'pointer', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' },
+  roleTag: {
+    background: '#e0e7ff',
+    border: '1px solid #000',
+    color: '#4338ca',
+    padding: '1px 8px',
+    borderRadius: '4px',
+    fontSize: '11px',
+    fontWeight: '800',
+    display: 'inline-block',
+  },
 };
 
 export default PostDetail;

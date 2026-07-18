@@ -82,6 +82,27 @@ class MeView(APIView):
             "comments": comments_data
         })
 
+    def put(self, request):
+        user = request.user
+        profile = user.profile
+        role = request.data.get('role')
+        if role:
+            allowed_roles = ['student', 'educator', 'researcher', 'professional', 'self_learner']
+            if role not in allowed_roles:
+                return Response({"role": ["You cannot self-declare this role."]}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = ProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "user": {
+                    "id": user.id,
+                    "username": user.username
+                },
+                "profile": serializer.data
+            })
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class AvatarUpdateView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]

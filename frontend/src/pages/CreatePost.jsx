@@ -125,7 +125,11 @@ function CreatePost() {
 
   return (
     <div style={styles.page}>
-      <div style={styles.card}>
+      <div style={{ width: '100%', maxWidth: '700px', display: 'flex', flexDirection: 'column' }}>
+        <button onClick={() => navigate(-1)} style={styles.backBtn}>
+          ← Back
+        </button>
+        <div style={styles.card}>
         <h1 style={styles.heading}>Create a new post</h1>
         <p style={styles.subtitle}>Share something with the EduHaven community</p>
 
@@ -277,13 +281,15 @@ function CreatePost() {
           </button>
         </form>
       </div>
+      </div>
     </div>
   );
 }
 
 const styles = {
-  page: { minHeight: "calc(100vh - 64px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px" },
-  card: { width: "100%", maxWidth: "700px", background: "#ffffff", border: "var(--brutal-border)", boxShadow: "var(--brutal-shadow)", borderRadius: "12px", padding: "32px" },
+  page: { minHeight: "calc(100vh - 64px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 20px" },
+  card: { width: "100%", background: "#ffffff", border: "var(--brutal-border)", boxShadow: "var(--brutal-shadow)", borderRadius: "12px", padding: "32px" },
+  backBtn: { alignSelf: 'flex-start', marginBottom: '20px', background: 'white', color: '#111827', border: 'var(--brutal-border)', boxShadow: '2px 2px 0px #000', padding: '8px 16px', borderRadius: '9999px', fontWeight: '700', cursor: 'pointer', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' },
   heading: { margin: 0, fontSize: "26px", fontWeight: "800", letterSpacing: "-0.5px" },
   subtitle: { marginTop: "6px", marginBottom: "24px", fontSize: "14px", color: "#4b5563", fontWeight: "500" },
   errorBox: { background: "var(--cat-news)", color: "#9f1239", padding: "12px", borderRadius: "6px", fontSize: "14px", marginBottom: "16px", border: "var(--brutal-border)", boxShadow: "2px 2px 0 #000", fontWeight: "600" },
